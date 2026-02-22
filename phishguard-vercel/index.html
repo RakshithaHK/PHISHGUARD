@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PhishGuard AI — Unified Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════════════════
+   DESIGN SYSTEM — PHISHGUARD UNIFIED PLATFORM
+   Aesthetic: Industrial Terminal × Cybersecurity
+   ─ Deep slate bg, amber+cyan accents, mono type
+═══════════════════════════════════════════════ */
+:root {
+  --bg:        #070a0f;
+  --surface:   #0c1018;
+  --card:      #101820;
+  --card2:     #131e28;
+  --border:    #1a2840;
+  --border2:   #243550;
+
+  --amber:     #ffb347;
+  --amber-dim: rgba(255,179,71,0.12);
+  --cyan:      #00d4ff;
+  --cyan-dim:  rgba(0,212,255,0.1);
+  --violet:    #a78bfa;
+  --ok:        #34d399;
+  --danger:    #f87171;
+  --warn:      #fb923c;
+  --mid:       #fbbf24;
+
+  --text:      #e0eaf8;
+  --text2:     #8fa8c0;
+  --muted:     #3d5570;
+
+  --font-ui:   'Outfit', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --sidebar-w: 260px;
+  --radius:    14px;
+  --radius-sm: 8px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  height: 100%;
+  display: flex;
+  overflow: hidden;
+}
+
+/* scanline texture overlay */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.04) 2px,
+    rgba(0,0,0,0.04) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ══════════════════════════════
+   SIDEBAR
+══════════════════════════════ */
+.sidebar {
+  width: var(--sidebar-w);
+  min-width: var(--sidebar-w);
+  height: 100vh;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 10;
+  overflow: hidden;
+}
+
+/* amber top accent line */
+.sidebar::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--amber), var(--cyan));
+}
+
+.sidebar-logo {
+  padding: 28px 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.logo-mark {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 6px;
+}
+.logo-shield {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, #1a2840, #243550);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 0 20px rgba(255,179,71,0.15), inset 0 1px 0 rgba(255,255,255,0.05);
+  position: relative; overflow: hidden;
+  animation: shieldPulse 4s ease-in-out infinite;
+}
+@keyframes shieldPulse {
+  0%,100% { box-shadow: 0 0 20px rgba(255,179,71,0.15); }
+  50%      { box-shadow: 0 0 30px rgba(255,179,71,0.35); }
+}
+
+.logo-text {
+  font-size: 1.1rem; font-weight: 800; letter-spacing: -0.3px;
+  color: var(--text);
+  line-height: 1;
+}
+.logo-text span { color: var(--amber); }
+.logo-version {
+  font-family: var(--font-mono); font-size: 0.65rem;
+  color: var(--muted); letter-spacing: 0.08em;
+}
+
+/* engine status */
+.engine-status {
+  display: flex; align-items: center; gap: 7px; margin-top: 10px;
+  font-family: var(--font-mono); font-size: 0.68rem; color: var(--ok);
+}
+.status-pulse {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--ok);
+  box-shadow: 0 0 6px var(--ok);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:0.3 } }
+
+/* ── NAV SECTIONS ── */
+.sidebar-nav { padding: 16px 10px; flex: 1; overflow-y: auto; }
+.nav-group-label {
+  font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--muted); padding: 8px 10px 6px;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 11px;
+  padding: 10px 12px; border-radius: var(--radius-sm);
+  cursor: pointer; margin-bottom: 2px;
+  transition: all 0.2s;
+  position: relative; overflow: hidden;
+  border: 1px solid transparent;
+}
+.nav-item::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+  background: var(--amber); border-radius: 0 2px 2px 0;
+  transform: scaleY(0);
+  transition: transform 0.2s;
+}
+.nav-item:hover { background: rgba(255,179,71,0.05); border-color: var(--border); }
+.nav-item.active {
+  background: rgba(255,179,71,0.08);
+  border-color: rgba(255,179,71,0.2);
+}
+.nav-item.active::before { transform: scaleY(1); }
+
+.nav-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; flex-shrink: 0;
+  background: var(--card); border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+.nav-item.active .nav-icon, .nav-item:hover .nav-icon {
+  border-color: rgba(255,179,71,0.3);
+  background: rgba(255,179,71,0.06);
+}
+
+.nav-label { font-size: 0.85rem; font-weight: 600; color: var(--text2); flex: 1; transition: color 0.2s; }
+.nav-item.active .nav-label, .nav-item:hover .nav-label { color: var(--text); }
+
+.nav-badge {
+  font-family: var(--font-mono); font-size: 0.6rem; font-weight: 700;
+  padding: 2px 7px; border-radius: 100px; text-transform: uppercase; letter-spacing: .04em;
+}
+.badge-new { background: rgba(167,139,250,0.15); color: var(--violet); border: 1px solid rgba(167,139,250,0.25); }
+.badge-live { background: rgba(52,211,153,0.12); color: var(--ok); border: 1px solid rgba(52,211,153,0.2); }
+
+.nav-divider { height: 1px; background: var(--border); margin: 10px 10px; }
+
+/* ── SIDEBAR FOOTER ── */
+.sidebar-footer {
+  padding: 14px 16px;
+  border-top: 1px solid var(--border);
+  font-family: var(--font-mono); font-size: 0.67rem; color: var(--muted);
+  line-height: 1.8;
+}
+
+/* ══════════════════════════════
+   MAIN CONTENT AREA
+══════════════════════════════ */
+.main {
+  flex: 1;
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── TOP BAR ── */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 32px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 5;
+  backdrop-filter: blur(10px);
+}
+
+.topbar-breadcrumb {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted);
+}
+.topbar-breadcrumb .sep { color: var(--border2); }
+.topbar-breadcrumb .current { color: var(--amber); }
+
+.topbar-actions { display: flex; align-items: center; gap: 10px; }
+
+.topbar-stat {
+  display: flex; align-items: center; gap: 7px;
+  background: var(--card); border: 1px solid var(--border);
+  padding: 6px 12px; border-radius: var(--radius-sm);
+  font-family: var(--font-mono); font-size: 0.72rem;
+}
+.topbar-stat .val { color: var(--amber); font-weight: 700; }
+.topbar-stat .lbl { color: var(--muted); }
+
+/* ── PAGE CONTENT ── */
+.page { display: none; padding: 32px; animation: pageIn 0.35s cubic-bezier(.22,1,.36,1); }
+.page.active { display: block; }
+@keyframes pageIn { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform:none; } }
+
+/* ══════════════════════════════
+   SHARED UI COMPONENTS
+══════════════════════════════ */
+.page-header { margin-bottom: 28px; }
+.page-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 6px; }
+.page-title em { font-style: normal; color: var(--amber); }
+.page-desc { font-family: var(--font-mono); font-size: 0.8rem; color: var(--text2); line-height: 1.7; }
+
+/* card */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.card + .card { margin-top: 20px; }
+
+.card-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.012);
+}
+.card-icon {
+  width: 34px; height: 34px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.card-title { font-size: 0.92rem; font-weight: 700; }
+.card-subtitle { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text2); margin-top: 2px; }
+.card-body { padding: 22px; }
+
+/* grid helpers */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+@media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+/* ── FORM ── */
+.form-group { margin-bottom: 16px; }
+label.lbl {
+  display: block; font-family: var(--font-mono); font-size: 0.68rem;
+  text-transform: uppercase; letter-spacing: 0.08em; color: var(--text2);
+  margin-bottom: 7px;
+}
+
+input[type=text], input[type=url], input[type=email], input[type=password], textarea, select {
+  width: 100%; background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  color: var(--text); font-family: var(--font-mono); font-size: 0.83rem;
+  padding: 11px 14px; outline: none; resize: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 3px rgba(255,179,71,0.08);
+}
+select option { background: var(--card); }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 10px 20px; border-radius: var(--radius-sm);
+  font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700;
+  letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer;
+  border: none; transition: all 0.2s; white-space: nowrap;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--amber), #ff8c00);
+  color: #000;
+  box-shadow: 0 4px 16px rgba(255,179,71,0.2);
+}
+.btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 6px 24px rgba(255,179,71,0.35); }
+.btn-primary:active { transform: none; }
+.btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+.btn-secondary {
+  background: var(--card2); border: 1px solid var(--border2);
+  color: var(--text2);
+}
+.btn-secondary:hover { border-color: var(--amber); color: var(--amber); }
+
+.btn-danger { background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.25); color: var(--danger); }
+.btn-danger:hover { background: rgba(248,113,113,0.2); }
+
+.btn-full { width: 100%; }
+
+.btn.loading { position: relative; overflow: hidden; pointer-events: none; }
+.btn.loading::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  animation: shimmer 1s infinite;
+}
+@keyframes shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+
+/* ── RESULT BOX ── */
+.result-box {
+  border-radius: var(--radius); border: 1px solid var(--border);
+  overflow: hidden; display: none; margin-top: 18px;
+  animation: resultPop 0.4s cubic-bezier(.22,1,.36,1);
+}
+.result-box.show { display: block; }
+@keyframes resultPop { from { opacity:0; transform: scale(0.97) translateY(6px); } to { opacity:1; transform:none; } }
+
+.result-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px;
+}
+.result-verdict { display: flex; align-items: center; gap: 12px; }
+.verdict-ring { position: relative; width: 52px; height: 52px; flex-shrink: 0; }
+.verdict-ring svg { transform: rotate(-90deg); }
+.ring-bg { fill: none; stroke: var(--border2); stroke-width: 4; }
+.ring-fg { fill: none; stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1); }
+.ring-pct {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: 0.65rem; font-weight: 700;
+}
+.risk-chip {
+  font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700;
+  padding: 5px 12px; border-radius: 6px; text-transform: uppercase; letter-spacing: .04em;
+}
+.result-body { padding: 4px 20px 18px; }
+.result-section { margin-top: 14px; }
+.section-title { font-family: var(--font-mono); font-size: 0.65rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 8px; }
+.indicator-list { display: flex; flex-direction: column; gap: 5px; }
+.indicator {
+  display: flex; align-items: flex-start; gap: 8px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 7px;
+  padding: 9px 12px; font-family: var(--font-mono); font-size: 0.77rem; color: var(--text);
+  animation: indSlide 0.3s ease both;
+}
+.indicator::before { content: '›'; color: var(--danger); font-weight: 700; flex-shrink: 0; }
+.indicator.safe::before { content: '✓'; color: var(--ok); }
+@keyframes indSlide { from { opacity:0; transform: translateX(-6px); } to { opacity:1; transform:none; } }
+.rec-box {
+  background: var(--surface); border-radius: var(--radius-sm);
+  border-left: 3px solid var(--amber);
+  padding: 11px 14px; font-family: var(--font-mono); font-size: 0.8rem; color: var(--text); line-height: 1.6;
+}
+.meta-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.meta-pill {
+  font-family: var(--font-mono); font-size: 0.67rem; color: var(--muted);
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 3px 9px; border-radius: 100px;
+}
+
+/* risk color classes */
+.r-SAFE     { background: rgba(52,211,153,0.1);   color: var(--ok);     border-color: rgba(52,211,153,0.25); }
+.r-LOW      { background: rgba(52,211,153,0.06);  color: #6ee7b7;        border-color: rgba(52,211,153,0.15); }
+.r-MEDIUM   { background: rgba(251,191,36,0.1);   color: var(--mid);    border-color: rgba(251,191,36,0.25); }
+.r-HIGH     { background: rgba(251,146,60,0.1);   color: var(--warn);   border-color: rgba(251,146,60,0.25); }
+.r-CRITICAL { background: rgba(248,113,113,0.1);  color: var(--danger); border-color: rgba(248,113,113,0.3); }
+
+/* ── STEP BADGE ── */
+.steps { display: flex; flex-direction: column; gap: 10px; }
+.step-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 12px 14px;
+}
+.step-num {
+  width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; margin-top: 1px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,179,71,0.1); border: 1px solid rgba(255,179,71,0.25);
+  font-family: var(--font-mono); font-size: 0.68rem; color: var(--amber); font-weight: 700;
+}
+.step-text { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text2); line-height: 1.6; }
+.step-text code {
+  background: rgba(0,212,255,0.1); color: var(--cyan);
+  padding: 1px 6px; border-radius: 4px; font-size: 0.76rem;
+}
+
+/* ── CODE BLOCK ── */
+.code-block {
+  background: #060c14; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 16px 18px; font-family: var(--font-mono); font-size: 0.78rem; line-height: 1.8;
+  overflow-x: auto; position: relative; margin: 12px 0;
+}
+.code-block .c { color: var(--muted); font-style: italic; }
+.code-block .k { color: var(--violet); }
+.code-block .s { color: #ffd080; }
+.code-block .v { color: var(--cyan); }
+.code-block .cmd { color: var(--ok); }
+.copy-btn {
+  position: absolute; top: 8px; right: 8px;
+  background: var(--card); border: 1px solid var(--border);
+  color: var(--muted); font-family: var(--font-mono); font-size: 0.65rem;
+  padding: 3px 9px; border-radius: 5px; cursor: pointer; transition: all 0.2s;
+}
+.copy-btn:hover { border-color: var(--amber); color: var(--amber); }
+
+/* ── TOAST ── */
+#toast-wrap {
+  position: fixed; bottom: 24px; right: 24px; z-index: 9998;
+  display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+}
+.toast {
+  background: var(--card2); border: 1px solid var(--border2); border-radius: 10px;
+  padding: 12px 16px; font-family: var(--font-mono); font-size: 0.78rem;
+  min-width: 260px; max-width: 360px;
+  display: flex; align-items: center; gap: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  animation: toastIn 0.35s cubic-bezier(.22,1,.36,1);
+  pointer-events: all;
+}
+.toast.danger { border-color: rgba(248,113,113,0.4); }
+.toast.success { border-color: rgba(52,211,153,0.35); }
+.toast.warn { border-color: rgba(251,146,60,0.35); }
+@keyframes toastIn { from { transform: translateX(110%); opacity:0; } to { transform:none; opacity:1; } }
+@keyframes toastOut { from { transform:none; opacity:1; } to { transform: translateX(115%); opacity:0; } }
+
+/* ── FILE TAGS ── */
+.file-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+.file-tag {
+  display: flex; align-items: center; gap: 5px;
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 4px 10px; border-radius: 6px;
+  font-family: var(--font-mono); font-size: 0.68rem; color: var(--text2);
+}
+.file-tag .ext { color: var(--violet); }
+
+/* ── INTEGRATION STATUS CARDS (dashboard) ── */
+.int-status-card {
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px 20px;
+  transition: all 0.25s; cursor: pointer; position: relative; overflow: hidden;
+}
+.int-status-card::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--amber), transparent);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform 0.3s;
+}
+.int-status-card:hover::after { transform: scaleX(1); }
+.int-status-card:hover { border-color: rgba(255,179,71,0.25); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+
+.isc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.isc-icon { font-size: 24px; }
+.isc-status {
+  font-family: var(--font-mono); font-size: 0.65rem;
+  padding: 3px 8px; border-radius: 100px;
+}
+.isc-status.enabled  { background: rgba(52,211,153,0.1); color: var(--ok); border: 1px solid rgba(52,211,153,0.25); }
+.isc-status.disabled { background: rgba(61,85,112,0.2); color: var(--muted); border: 1px solid var(--border); }
+
+.isc-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+.isc-desc { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text2); line-height: 1.5; }
+
+/* ── COMPARISON TABLE ── */
+.compare-wrap { overflow-x: auto; margin-top: 16px; }
+.compare-table { width: 100%; border-collapse: collapse; }
+.compare-table th {
+  font-family: var(--font-mono); font-size: 0.67rem; text-transform: uppercase; letter-spacing: .08em;
+  color: var(--text2); padding: 10px 14px; text-align: left;
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+.compare-table td {
+  padding: 11px 14px; font-family: var(--font-mono); font-size: 0.77rem;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.compare-table tr:hover td { background: rgba(255,255,255,0.015); }
+.compare-table .name-col { font-weight: 700; color: var(--text); }
+.tick { color: var(--ok); } .cross { color: var(--danger); } .half { color: var(--warn); }
+
+/* ── SCAN HISTORY TABLE ── */
+.hist-row {
+  display: grid; grid-template-columns: 38px 1fr auto auto;
+  align-items: center; gap: 14px;
+  padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.03);
+  transition: background 0.15s; animation: indSlide 0.3s ease both;
+}
+.hist-row:last-child { border-bottom: none; }
+.hist-row:hover { background: rgba(255,255,255,0.015); }
+.hist-icon { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 15px; border: 1px solid var(--border); }
+.hist-target { font-family: var(--font-mono); font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hist-time { font-family: var(--font-mono); font-size: 0.68rem; color: var(--muted); margin-top: 3px; }
+.hist-pct { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text2); text-align: right; }
+
+/* ── TOGGLE SWITCH ── */
+.toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.toggle-row:last-child { border-bottom: none; }
+.toggle-info .toggle-title { font-size: 0.88rem; font-weight: 600; }
+.toggle-info .toggle-desc { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text2); margin-top: 3px; }
+.toggle {
+  width: 42px; height: 24px; background: var(--border2); border-radius: 100px;
+  cursor: pointer; position: relative; flex-shrink: 0;
+  transition: background 0.25s;
+}
+.toggle.on { background: var(--amber); }
+.toggle::after {
+  content: ''; position: absolute; top: 3px; left: 3px;
+  width: 18px; height: 18px; background: #fff;
+  border-radius: 50%; transition: transform 0.25s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+.toggle.on::after { transform: translateX(18px); }
+
+/* ── QUICK URL PILLS ── */
+.quick-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.quick-pill {
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text2); font-family: var(--font-mono); font-size: 0.68rem;
+  padding: 4px 10px; border-radius: 5px; cursor: pointer; transition: all 0.2s;
+}
+.quick-pill:hover { border-color: var(--cyan); color: var(--cyan); }
+
+/* ── MOBILE SIDEBAR ── */
+.menu-btn {
+  display: none; background: none; border: 1px solid var(--border);
+  color: var(--text2); font-size: 18px; padding: 6px 10px;
+  border-radius: 7px; cursor: pointer;
+}
+@media (max-width: 768px) {
+  body { flex-direction: column; overflow: auto; }
+  .sidebar {
+    width: 100%; min-width: unset; height: auto;
+    position: relative; border-right: none; border-bottom: 1px solid var(--border);
+  }
+  .sidebar-nav { display: none; }
+  .sidebar-nav.open { display: block; }
+  .sidebar-footer { display: none; }
+  .main { height: auto; overflow: visible; }
+  .page { padding: 20px 16px; }
+  .menu-btn { display: block; }
+  .topbar { padding: 12px 16px; }
+}
+
+/* ── AMBER GLOW ── */
+.glow-amber { box-shadow: 0 0 24px rgba(255,179,71,0.12); }
+</style>
+</head>
+<body>
+
+<!-- ════════════════ SIDEBAR ════════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <div class="logo-shield">🛡</div>
+      <div>
+        <div class="logo-text">Phish<span>Guard</span></div>
+        <div class="logo-version">UNIFIED PLATFORM v2.0</div>
+      </div>
+    </div>
+    <div class="engine-status">
+      <div class="status-pulse"></div>
+      AI ENGINE ACTIVE
+    </div>
+  </div>
+
+  <nav class="sidebar-nav" id="sideNav">
+    <div class="nav-group-label">Detection Tools</div>
+
+    <div class="nav-item active" onclick="showPage('dashboard', this)">
+      <div class="nav-icon">⚡</div>
+      <div class="nav-label">Dashboard</div>
+      <div class="nav-badge badge-live">Live</div>
+    </div>
+
+    <div class="nav-item" onclick="showPage('email-scan', this)">
+      <div class="nav-icon">📧</div>
+      <div class="nav-label">Email Scanner</div>
+    </div>
+
+    <div class="nav-item" onclick="showPage('url-scan', this)">
+      <div class="nav-icon">🔗</div>
+      <div class="nav-label">URL Scanner</div>
+    </div>
+
+    <div class="nav-divider"></div>
+    <div class="nav-group-label">Gmail Integrations</div>
+
+    <div class="nav-item" onclick="showPage('extension', this)">
+      <div class="nav-icon">🔌</div>
+      <div class="nav-label">Chrome Extension</div>
+      <div class="nav-badge badge-new">Easy</div>
+    </div>
+
+    <div class="nav-item" onclick="showPage('smtp', this)">
+      <div class="nav-icon">📬</div>
+      <div class="nav-label">SMTP Milter</div>
+    </div>
+
+    <div class="nav-item" onclick="showPage('webhook', this)">
+      <div class="nav-icon">🔗</div>
+      <div class="nav-label">Pub/Sub Webhook</div>
+    </div>
+
+    <div class="nav-item" onclick="showPage('addon', this)">
+      <div class="nav-icon">📱</div>
+      <div class="nav-label">Gmail Add-in</div>
+    </div>
+
+    <div class="nav-divider"></div>
+    <div class="nav-group-label">System</div>
+
+    <div class="nav-item" onclick="showPage('history', this)">
+      <div class="nav-icon">📋</div>
+      <div class="nav-label">Scan History</div>
+    </div>
+
+    <div class="nav-item" onclick="showPage('settings', this)">
+      <div class="nav-icon">⚙️</div>
+      <div class="nav-label">Settings</div>
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    PhishGuard AI · All integrations<br/>
+    API: <span id="api-url-display">Vercel API</span>
+  </div>
+</aside>
+
+<!-- ════════════════ MAIN ════════════════ -->
+<div class="main">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="menu-btn" onclick="document.getElementById('sideNav').classList.toggle('open')">☰</button>
+      <div class="topbar-breadcrumb">
+        PhishGuard <span class="sep">/</span>
+        <span class="current" id="breadcrumb">Dashboard</span>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <div class="topbar-stat"><span class="val" id="ts-scans">0</span><span class="lbl">scans</span></div>
+      <div class="topbar-stat"><span class="val" id="ts-threats" style="color:var(--danger)">0</span><span class="lbl">threats</span></div>
+      <div class="topbar-stat" style="cursor:pointer" onclick="showPage('settings', document.querySelector('.nav-item:last-child'))">
+        <span id="ts-api-status" style="color:var(--ok)">●</span>
+        <span class="lbl" id="ts-api-label">API OK</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PAGE: DASHBOARD ═══ -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-header">
+      <div class="page-title">Command <em>Center</em></div>
+      <div class="page-desc">All PhishGuard integrations in one place. Select any module to configure and use it.</div>
+    </div>
+
+    <!-- Live Scan Stats -->
+    <div class="grid-3" style="margin-bottom:20px">
+      <div class="card">
+        <div class="card-body" style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-family:var(--font-mono);font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Total Scans</div>
+            <div style="font-size:2rem;font-weight:800;color:var(--amber)" id="stat-total">0</div>
+          </div>
+          <div style="font-size:32px;opacity:.4">📊</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body" style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-family:var(--font-mono);font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Threats Found</div>
+            <div style="font-size:2rem;font-weight:800;color:var(--danger)" id="stat-threats">0</div>
+          </div>
+          <div style="font-size:32px;opacity:.4">🚨</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body" style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-family:var(--font-mono);font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Clean Items</div>
+            <div style="font-size:2rem;font-weight:800;color:var(--ok)" id="stat-clean">0</div>
+          </div>
+          <div style="font-size:32px;opacity:.4">✅</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Integration Cards -->
+    <div style="font-family:var(--font-mono);font-size:0.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:14px">Available Integrations — click to launch</div>
+    <div class="grid-2">
+      <div class="int-status-card" onclick="showPage('email-scan', null)">
+        <div class="isc-header">
+          <div class="isc-icon">📧</div>
+          <div class="isc-status enabled">Ready</div>
+        </div>
+        <div class="isc-title">Email Scanner</div>
+        <div class="isc-desc">Paste email content for instant AI-powered phishing analysis with 12+ detection signals.</div>
+      </div>
+      <div class="int-status-card" onclick="showPage('url-scan', null)">
+        <div class="isc-header">
+          <div class="isc-icon">🔗</div>
+          <div class="isc-status enabled">Ready</div>
+        </div>
+        <div class="isc-title">URL Scanner</div>
+        <div class="isc-desc">Deep-inspect any URL for malicious patterns, brand impersonation, and entropy anomalies.</div>
+      </div>
+      <div class="int-status-card" onclick="showPage('extension', null)">
+        <div class="isc-header">
+          <div class="isc-icon">🔌</div>
+          <div class="isc-status" id="ext-status">Setup Required</div>
+        </div>
+        <div class="isc-title">Chrome Extension</div>
+        <div class="isc-desc">Auto-scans every Gmail email you open. Inject threat banners directly into Gmail's UI.</div>
+      </div>
+      <div class="int-status-card" onclick="showPage('smtp', null)">
+        <div class="isc-header">
+          <div class="isc-icon">📬</div>
+          <div class="isc-status disabled">Server Required</div>
+        </div>
+        <div class="isc-title">SMTP Milter</div>
+        <div class="isc-desc">Block threats before delivery at the mail server level. Reject, quarantine or warn.</div>
+      </div>
+      <div class="int-status-card" onclick="showPage('webhook', null)">
+        <div class="isc-header">
+          <div class="isc-icon">🔗</div>
+          <div class="isc-status disabled">GCP Required</div>
+        </div>
+        <div class="isc-title">Gmail Pub/Sub Webhook</div>
+        <div class="isc-desc">Auto-scan every incoming Gmail message via Google Cloud push notifications.</div>
+      </div>
+      <div class="int-status-card" onclick="showPage('addon', null)">
+        <div class="isc-header">
+          <div class="isc-icon">📱</div>
+          <div class="isc-status disabled">Deploy Required</div>
+        </div>
+        <div class="isc-title">Gmail Add-in</div>
+        <div class="isc-desc">Official Google Workspace sidebar add-on. Works for entire organizations.</div>
+      </div>
+    </div>
+
+    <!-- Comparison Table -->
+    <div class="card" style="margin-top:24px">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(167,139,250,0.1)">📊</div>
+        <div>
+          <div class="card-title">Which Integration Is Right For You?</div>
+          <div class="card-subtitle">Feature comparison across all deployment modes</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="compare-wrap">
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th>Integration</th>
+                <th>Blocks Pre-Delivery</th>
+                <th>Works Locally</th>
+                <th>Org-Wide</th>
+                <th>Auto-Scans</th>
+                <th>Complexity</th>
+                <th>Best For</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td class="name-col">🔌 Chrome Extension</td><td><span class="cross">✗</span></td><td><span class="tick">✓</span></td><td><span class="half">Partial</span></td><td><span class="tick">✓</span></td><td>⭐ Easy</td><td>Individuals</td></tr>
+              <tr><td class="name-col">📬 SMTP Milter</td><td><span class="tick">✓</span></td><td><span class="cross">✗</span></td><td><span class="tick">✓</span></td><td><span class="tick">✓</span></td><td>⭐⭐⭐ Advanced</td><td>Mail server admins</td></tr>
+              <tr><td class="name-col">🔗 Pub/Sub Webhook</td><td><span class="cross">✗</span></td><td><span class="cross">✗</span></td><td><span class="tick">✓</span></td><td><span class="tick">✓</span></td><td>⭐⭐ Medium</td><td>GCP/Workspace teams</td></tr>
+              <tr><td class="name-col">📱 Gmail Add-in</td><td><span class="cross">✗</span></td><td><span class="cross">✗</span></td><td><span class="tick">✓</span></td><td><span class="cross">✗</span></td><td>⭐⭐ Medium</td><td>Enterprise orgs</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PAGE: EMAIL SCANNER ═══ -->
+  <div class="page" id="page-email-scan">
+    <div class="page-header">
+      <div class="page-title">📧 Email <em>Scanner</em></div>
+      <div class="page-desc">Paste any email's details below. The AI engine checks 12+ phishing signals in milliseconds.</div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon" style="background:rgba(0,212,255,0.1)">✍️</div>
+            <div><div class="card-title">Email Details</div><div class="card-subtitle">All fields are optional — more data = more accurate scan</div></div>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="lbl">Sender Email Address</label>
+              <input type="text" id="e-sender" placeholder="alerts@paypa1-secure.xyz"/>
+            </div>
+            <div class="form-group">
+              <label class="lbl">Subject Line</label>
+              <input type="text" id="e-subject" placeholder="URGENT: Your account has been suspended!"/>
+            </div>
+            <div class="form-group">
+              <label class="lbl">Email Body</label>
+              <textarea id="e-body" rows="7" placeholder="Paste email body here...&#10;&#10;Dear customer, we've detected unusual activity on your account..."></textarea>
+            </div>
+            <div style="display:flex;gap:10px">
+              <button class="btn btn-primary btn-full" id="email-scan-btn" onclick="runEmailScan()">⚡ Analyze Email</button>
+              <button class="btn btn-secondary" onclick="loadEmailExample()">Example</button>
+            </div>
+          </div>
+        </div>
+        <div class="result-box" id="email-result"></div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon" style="background:rgba(255,179,71,0.1)">📖</div>
+            <div><div class="card-title">Detection Signals</div><div class="card-subtitle">What the engine checks</div></div>
+          </div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              ${['Phishing keyword matching (30+ terms)','Sender domain & TLD risk scoring','Homograph / lookalike domain detection','Urgency & pressure language patterns','Sensitive information request detection','Deceptive hyperlink patterns','Brand name misspelling detection','Excessive link density in body','Numeric sequences in sender domain','HTML obfuscation techniques'].map((s,i)=>`<div style="display:flex;align-items:center;gap:9px;font-family:var(--font-mono);font-size:0.77rem;color:var(--text2);padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:7px"><span style="color:var(--amber);font-weight:700;font-size:0.8rem">${(i+1).toString().padStart(2,'0')}</span>${s}</div>`).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PAGE: URL SCANNER ═══ -->
+  <div class="page" id="page-url-scan">
+    <div class="page-header">
+      <div class="page-title">🔗 URL <em>Scanner</em></div>
+      <div class="page-desc">Deep-inspect any URL for malicious patterns, entropy anomalies, and brand impersonation.</div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon" style="background:rgba(167,139,250,0.1)">🔍</div>
+            <div><div class="card-title">URL Analysis</div><div class="card-subtitle">Paste any URL — no tracking, instant results</div></div>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="lbl">Quick Test Examples</label>
+              <div class="quick-pills">
+                <div class="quick-pill" onclick="setUrl('http://paypal-verify.account-secure.xyz/login/update')">🎣 Phishing</div>
+                <div class="quick-pill" onclick="setUrl('https://192.168.1.1/admin/login.php')">🔢 IP-based</div>
+                <div class="quick-pill" onclick="setUrl('https://github.com')">✅ Safe</div>
+                <div class="quick-pill" onclick="setUrl('https://amaz0n-deals.tk/account%2Fverify%2F@redirect')">🕵 Obfuscated</div>
+                <div class="quick-pill" onclick="setUrl('http://secure-banking.paypa1.login.verify-now.club/confirm')">🏦 Banking</div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="lbl">URL to Inspect</label>
+              <input type="text" id="u-url" placeholder="https://suspicious-link.example.xyz/verify" oninput="urlLivePreview()"/>
+            </div>
+            <div class="form-group">
+              <label class="lbl">Live Feature Extraction</label>
+              <div id="url-preview" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 14px;font-family:var(--font-mono);font-size:0.75rem;color:var(--muted);min-height:48px;line-height:1.9;transition:all 0.2s">
+                Enter a URL above to see real-time analysis...
+              </div>
+            </div>
+            <button class="btn btn-primary btn-full" id="url-scan-btn" onclick="runUrlScan()">⚡ Analyze URL</button>
+          </div>
+        </div>
+        <div class="result-box" id="url-result"></div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon" style="background:rgba(248,113,113,0.1)">🔬</div>
+            <div><div class="card-title">URL Signal Checklist</div><div class="card-subtitle">12 automated checks per URL</div></div>
+          </div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              ${['IP address used as hostname (no domain)','Abnormal URL length (>75 chars)','Excessive subdomain nesting','High-risk TLD (.xyz .tk .ml .cf .ga)','Brand name in non-official domain','Shannon entropy (auto-generated domain)','Suspicious path keywords (/login /verify)','@ symbol redirect trick','Double-slash redirect pattern','URL-encoded character obfuscation','HTTP instead of HTTPS','Numeric-only domain structure'].map((s,i)=>`<div style="display:flex;align-items:center;gap:9px;font-family:var(--font-mono);font-size:0.77rem;color:var(--text2);padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:7px"><span style="color:var(--cyan);font-weight:700;font-size:0.8rem">${(i+1).toString().padStart(2,'0')}</span>${s}</div>`).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PAGE: CHROME EXTENSION ═══ -->
+  <div class="page" id="page-extension">
+    <div class="page-header">
+      <div class="page-title">🔌 Chrome <em>Extension</em></div>
+      <div class="page-desc">Auto-scans Gmail emails as you read them. Injects threat banners and highlights dangerous links — no Gmail settings needed.</div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><div class="card-icon" style="background:rgba(0,212,255,0.1)">🚀</div><div><div class="card-title">Setup Instructions</div><div class="card-subtitle">5 minutes to protection</div></div></div>
+        <div class="card-body">
+          <div class="steps">
+            <div class="step-item"><div class="step-num">1</div><div class="step-text">Open Chrome and go to <code>chrome://extensions</code></div></div>
+            <div class="step-item"><div class="step-num">2</div><div class="step-text">Enable <code>Developer mode</code> toggle (top-right corner)</div></div>
+            <div class="step-item"><div class="step-num">3</div><div class="step-text">Click <code>Load unpacked</code> and select your <code>extension/</code> folder</div></div>
+            <div class="step-item"><div class="step-num">4</div><div class="step-text">Set your API URL below and regenerate the files</div></div>
+            <div class="step-item"><div class="step-num">5</div><div class="step-text">Open Gmail — PhishGuard now scans every email you open ✅</div></div>
+          </div>
+          <div style="margin-top:18px">
+            <label class="lbl">Your PhishGuard API URL</label>
+            <div style="display:flex;gap:8px">
+              <input type="text" id="ext-api-url" value="" placeholder="http://Vercel API"/>
+              <button class="btn btn-primary" onclick="generateExtensionCode()">Generate</button>
+            </div>
+          </div>
+          <div class="code-block" id="ext-manifest-preview" style="margin-top:14px;max-height:200px;overflow-y:auto">
+            <button class="copy-btn" onclick="copyCode('ext-manifest-preview')">Copy</button>
+            <span class="c">// manifest.json — paste into extension folder</span><br/>
+{<br/>
+&nbsp;&nbsp;<span class="k">"manifest_version"</span>: <span class="v">3</span>,<br/>
+&nbsp;&nbsp;<span class="k">"name"</span>: <span class="s">"PhishGuard AI for Gmail"</span>,<br/>
+&nbsp;&nbsp;<span class="k">"host_permissions"</span>: [<span class="s">"https://mail.google.com/*"</span>, <span class="s">"<span id="ext-url-in-manifest">http://Vercel API</span>/*"</span>],<br/>
+&nbsp;&nbsp;<span class="k">"content_scripts"</span>: [{<span class="k">"matches"</span>: [<span class="s">"https://mail.google.com/*"</span>], <span class="k">"js"</span>: [<span class="s">"content.js"</span>], <span class="k">"css"</span>: [<span class="s">"content.css"</span>]}],<br/>
+&nbsp;&nbsp;<span class="k">"background"</span>: {<span class="k">"service_worker"</span>: <span class="s">"background.js"</span>},<br/>
+&nbsp;&nbsp;<span class="k">"action"</span>: {<span class="k">"default_popup"</span>: <span class="s">"popup.html"</span>}<br/>
+}
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="card-header"><div class="card-icon" style="background:rgba(52,211,153,0.1)">✨</div><div><div class="card-title">What It Does</div><div class="card-subtitle">Features of the extension</div></div></div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              ${[['Auto-scan on open','Analyzes every email automatically when you open it — no button click needed'],['Threat banner','Injects a colored risk banner above the email with full indicator breakdown'],['Link highlighting','Outlines dangerous URLs in red directly inside the email body'],['Desktop notifications','Sends system alerts for HIGH and CRITICAL threats even when Gmail is in background'],['Popup dashboard','Click the extension icon for session stats and quick URL checker'],['Zero config','Works out of the box with just your API URL — no OAuth or logins']].map(([t,d])=>`<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px"><div style="font-size:0.88rem;font-weight:600;margin-bottom:4px">${t}</div><div style="font-family:var(--font-mono);font-size:0.73rem;color:var(--text2)">${d}</div></div>`).join('')}
+            </div>
+          </div>
+        </div>
+        <div class="file-tags">
+          <div class="file-tag">📄 <span class="ext">manifest.json</span></div>
+          <div class="file-tag">📄 <span class="ext">content.js</span></div>
+          <div class="file-tag">📄 <span class="ext">content.css</span></div>
+          <div class="file-tag">📄 <span class="ext">background.js</span></div>
+          <div class="file-tag">📄 <span class="ext">popup.html</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PAGE: SMTP MILTER ═══ -->
+  <div class="page" id="page-smtp">
+    <div class="page-header">
+      <div class="page-title">📬 SMTP <em>Milter</em></div>
+      <div class="page-desc">Server-level email filter. Sits between the internet and your inbox — can reject or quarantine threats before they're ever delivered.</div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><div class="card-icon" style="background:rgba(251,146,60,0.1)">⚙️</div><div><div class="card-title">Configuration Builder</div><div class="card-subtitle">Set thresholds, then copy the generated config</div></div></div>
+        <div class="card-body">
+          <div class="form-group">
+            <label class="lbl">Action on CRITICAL threats</label>
+            <select id="smtp-critical"><option value="REJECT">Reject (550 SMTP error)</option><option value="QUARANTINE">Quarantine to spam</option><option value="WARN">Warn only</option></select>
+          </div>
+          <div class="form-group">
+            <label class="lbl">Action on HIGH threats</label>
+            <select id="smtp-high"><option value="QUARANTINE">Quarantine to spam</option><option value="REJECT">Reject</option><option value="WARN">Warn + relabel subject</option></select>
+          </div>
+          <div class="form-group">
+            <label class="lbl">Action on MEDIUM threats</label>
+            <select id="smtp-medium"><option value="WARN">Prepend [SUSPECTED PHISHING] to subject</option><option value="QUARANTINE">Quarantine</option><option value="ALLOW">Allow through</option></select>
+          </div>
+          <div class="form-group">
+            <label class="lbl">Milter Port</label>
+            <input type="text" id="smtp-port" value="8894"/>
+          </div>
+          <div class="form-group">
+            <label class="lbl">PhishGuard API URL</label>
+            <input type="text" id="smtp-api" value=""/>
+          </div>
+          <button class="btn btn-primary btn-full" onclick="generateSmtpConfig()">⚙️ Generate Config + Postfix Commands</button>
+          <div class="code-block" id="smtp-config-out" style="margin-top:14px;max-height:260px;overflow-y:auto;display:none">
+            <button class="copy-btn" onclick="copyCode('smtp-config-out')">Copy</button>
+            <span id="smtp-config-content"></span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="card-header"><div class="card-icon" style="background:rgba(52,211,153,0.1)">📋</div><div><div class="card-title">Risk Action Matrix</div></div></div>
+          <div class="card-body" id="smtp-matrix">
+            <table class="compare-table">
+              <thead><tr><th>Risk Level</th><th>Default Action</th><th>SMTP Code</th></tr></thead>
+              <tbody>
+                <tr><td><span style="color:var(--danger);font-weight:700">CRITICAL</span></td><td>Reject message</td><td>550 5.7.1</td></tr>
+                <tr><td><span style="color:var(--warn);font-weight:700">HIGH</span></td><td>Move to Spam</td><td>Accept + label</td></tr>
+                <tr><td><span style="color:var(--mid);font-weight:700">MEDIUM</span></td><td>Relabel subject</td><td>Accept + modify</td></tr>
+                <tr><td><span style="color:var(--ok);font-weight:700">LOW / SAFE</span></td><td>Add X- headers</td><td>Accept silently</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <div class="card-header"><div class="card-icon" style="background:rgba(0,212,255,0.1)">🔧</div><div><div class="card-title">Install Commands</div></div></div>
+          <div class="card-body">
+            <div class="code-block"><button class="copy-btn" onclick="copyText('pip install pymilter requests fastapi uvicorn')">Copy</button>
+<span class="c"># Install dependencies</span>
+<span class="cmd">pip install pymilter requests</span>
+
+<span class="c"># Add to Postfix main.cf</span>
+<span class="cmd">echo "smtpd_milters = inet:127.0.0.1:8894" >> /etc/postfix/main.cf</span>
+<span class="cmd">echo "milter_default_action = accept" >> /etc/postfix/main.cf</span>
+<span class="cmd">postfix reload</span>
+
+<span class="c"># Run the milter</span>
+<span class="cmd">python phishguard_milter.py</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PAGE: WEBHOOK ═══ -->
+  <div class="page" id="page-webhook">
+    <div class="page-header">
+      <div class="page-title">🔗 Pub/Sub <em>Webhook</em></div>
+      <div class="page-desc">Auto-scan every Gmail message the moment it arrives using Google Cloud Pub/Sub push notifications.</div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><div class="card-icon" style="background:rgba(167,139,250,0.1)">🛠</div><div><div class="card-title">Setup Wizard</div><div class="card-subtitle">Follow each step in order</div></div></div>
+        <div class="card-body">
+          <div class="form-group">
+            <label class="lbl">Google Cloud Project ID</label>
+            <input type="text" id="wh-project" placeholder="my-gcp-project-123"/>
+          </div>
+          <div class="form-group">
+            <label class="lbl">Your Webhook Public URL</label>
+            <input type="text" id="wh-url" placeholder="https://yourserver.com/webhook/gmail"/>
+          </div>
+          <div class="form-group">
+            <label class="lbl">PhishGuard API URL</label>
+            <input type="text" id="wh-api" value=""/>
+          </div>
+          <button class="btn btn-primary btn-full" onclick="generateWebhookSteps()">📋 Generate My Setup Commands</button>
+          <div id="wh-steps-out" style="display:none;margin-top:16px">
+            <div class="steps" id="wh-steps-list"></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="card-header"><div class="card-icon" style="background:rgba(52,211,153,0.1)">🔄</div><div><div class="card-title">How It Works</div></div></div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:10px;font-family:var(--font-mono);font-size:0.78rem">
+              ${[['1️⃣','New email arrives in Gmail inbox'],['2️⃣','Gmail API fires a Pub/Sub push notification'],['3️⃣','Your webhook server receives it instantly'],['4️⃣','PhishGuard AI scans the full email content'],['5️⃣','Labels applied: PhishGuard/Phishing or PhishGuard/Suspected'],['6️⃣','Threats moved out of inbox automatically']].map(([n,t])=>`<div style="display:flex;gap:10px;align-items:center;padding:9px 12px;background:var(--surface);border:1px solid var(--border);border-radius:7px"><span style="flex-shrink:0">${n}</span><span style="color:var(--text2)">${t}</span></div>`).join('')}
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <div class="card-header"><div class="card-icon" style="background:rgba(255,179,71,0.1)">📌</div><div><div class="card-title">Gmail Labels Created</div></div></div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              ${[['PhishGuard/Phishing','#e74c3c','HIGH + CRITICAL threats'],['PhishGuard/Suspected','#f39c12','MEDIUM risk emails'],['PhishGuard/Scanned-Safe','#27ae60','SAFE + LOW (all clear)']].map(([l,c,d])=>`<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface);border:1px solid var(--border);border-radius:7px"><div style="width:10px;height:10px;border-radius:50%;background:${c};flex-shrink:0"></div><div><div style="font-size:0.82rem;font-weight:600">${l}</div><div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text2)">${d}</div></div></div>`).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PAGE: GMAIL ADD-IN ═══ -->
+  <div class="page" id="page-addon">
+    <div class="page-header">
+      <div class="page-title">📱 Gmail <em>Add-in</em></div>
+      <div class="page-desc">Deploy a PhishGuard panel inside Gmail's reading pane. Can be installed for an entire Google Workspace organization.</div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><div class="card-icon" style="background:rgba(0,212,255,0.1)">🚀</div><div><div class="card-title">Deployment Steps</div><div class="card-subtitle">Google Apps Script deployment</div></div></div>
+        <div class="card-body">
+          <div class="form-group">
+            <label class="lbl">PhishGuard API URL (must be public HTTPS)</label>
+            <input type="text" id="addon-api" placeholder="https://your-phishguard-api.com"/>
+          </div>
+          <button class="btn btn-primary btn-full" onclick="generateAddonCode()">📝 Generate Apps Script Code</button>
+          <div class="code-block" id="addon-code-out" style="margin-top:14px;max-height:220px;overflow-y:auto;display:none">
+            <button class="copy-btn" onclick="copyCode('addon-code-out')">Copy</button>
+            <span id="addon-code-content"></span>
+          </div>
+          <div class="steps" style="margin-top:16px">
+            <div class="step-item"><div class="step-num">1</div><div class="step-text">Go to <code>script.google.com</code> → Create new project</div></div>
+            <div class="step-item"><div class="step-num">2</div><div class="step-text">Enter your API URL above, click Generate, paste code into <code>Code.gs</code></div></div>
+            <div class="step-item"><div class="step-num">3</div><div class="step-text">Also paste <code>appsscript.json</code> manifest (enable it in Project Settings)</div></div>
+            <div class="step-item"><div class="step-num">4</div><div class="step-text">Deploy → New deployment → Type: Gmail Add-on</div></div>
+            <div class="step-item"><div class="step-num">5</div><div class="step-text">For org-wide: Google Admin Console → Apps → Marketplace → Domain install</div></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="card-header"><div class="card-icon" style="background:rgba(52,211,153,0.1)">✨</div><div><div class="card-title">Add-in Features</div></div></div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              ${[['Reading Pane Panel','PhishGuard panel appears automatically in the Gmail sidebar when you open any email'],['Risk Score Display','Shows animated confidence ring with risk level, threat category, and full indicator list'],['One-Click Actions','Buttons to move to spam, report phishing, or re-scan directly from the panel'],['Org Deployment','Install via Google Workspace Admin console for every user in your domain'],['No Extension Needed','Works natively inside Gmail — no Chrome extension required'],['Apps Script Hosted','No server needed for the add-in itself — runs on Google infrastructure']].map(([t,d])=>`<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px"><div style="font-size:0.88rem;font-weight:600;margin-bottom:4px">${t}</div><div style="font-family:var(--font-mono);font-size:0.73rem;color:var(--text2)">${d}</div></div>`).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PAGE: HISTORY ═══ -->
+  <div class="page" id="page-history">
+    <div class="page-header">
+      <div class="page-title">📋 Scan <em>History</em></div>
+      <div class="page-desc">All threat analyses from this session, sorted by most recent.</div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon" style="background:rgba(255,179,71,0.1)">📋</div>
+        <div><div class="card-title">Session Log</div><div class="card-subtitle" id="history-count">0 scans recorded</div></div>
+        <button class="btn btn-danger" style="margin-left:auto;padding:7px 14px;font-size:0.72rem" onclick="clearHistory()">Clear All</button>
+      </div>
+      <div id="history-list"><div style="padding:40px;text-align:center;font-family:var(--font-mono);font-size:0.82rem;color:var(--muted)">No scans yet. Run an email or URL scan to see results here.</div></div>
+    </div>
+  </div>
+
+  <!-- ═══ PAGE: SETTINGS ═══ -->
+  <div class="page" id="page-settings">
+    <div class="page-header">
+      <div class="page-title">⚙️ <em>Settings</em></div>
+      <div class="page-desc">Configure the PhishGuard AI platform, API connection, and detection preferences.</div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="card">
+          <div class="card-header"><div class="card-icon" style="background:rgba(0,212,255,0.1)">🔌</div><div><div class="card-title">API Connection</div><div class="card-subtitle">Configure your PhishGuard backend</div></div></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="lbl">API Base URL</label>
+              <div style="display:flex;gap:8px">
+                <input type="text" id="cfg-api" value=""/>
+                <button class="btn btn-secondary" onclick="testApiConnection()">Test</button>
+              </div>
+            </div>
+            <div id="api-test-result" style="display:none;font-family:var(--font-mono);font-size:0.78rem;padding:10px 12px;border-radius:8px;margin-top:8px"></div>
+            <button class="btn btn-primary btn-full" onclick="saveApiUrl()" style="margin-top:4px">Save API URL</button>
+          </div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <div class="card-header"><div class="card-icon" style="background:rgba(167,139,250,0.1)">🎛</div><div><div class="card-title">Detection Preferences</div></div></div>
+          <div class="card-body">
+            <div class="toggle-row">
+              <div class="toggle-info"><div class="toggle-title">Auto-scan on URL paste</div><div class="toggle-desc">Trigger scan automatically when URL is entered</div></div>
+              <div class="toggle on" id="tgl-autoscan" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info"><div class="toggle-title">Show all indicators</div><div class="toggle-desc">Show every signal, including low-confidence ones</div></div>
+              <div class="toggle on" id="tgl-allindicators" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info"><div class="toggle-title">Sound alerts</div><div class="toggle-desc">Play an alert sound on CRITICAL detections</div></div>
+              <div class="toggle" id="tgl-sound" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info"><div class="toggle-title">Session history</div><div class="toggle-desc">Save scan history for this session</div></div>
+              <div class="toggle on" id="tgl-history" onclick="this.classList.toggle('on')"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="card-header"><div class="card-icon" style="background:rgba(52,211,153,0.1)">📊</div><div><div class="card-title">Session Statistics</div></div></div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              ${[['stat-emails-count','Emails scanned','var(--cyan)'],['stat-urls-count','URLs scanned','var(--violet)'],['stat-found-count','Threats detected','var(--danger)'],['stat-safe-count','Clean items','var(--ok)'],['stat-avgtime','Avg scan time','var(--amber)']].map(([id,lbl,col])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px"><span style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text2)">${lbl}</span><span style="font-family:var(--font-mono);font-size:0.88rem;font-weight:700;color:${col}" id="${id}">0</span></div>`).join('')}
+            </div>
+            <button class="btn btn-danger btn-full" style="margin-top:14px" onclick="resetStats()">Reset Statistics</button>
+          </div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <div class="card-header"><div class="card-icon" style="background:rgba(255,179,71,0.1)">ℹ️</div><div><div class="card-title">About PhishGuard AI</div></div></div>
+          <div class="card-body" style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text2);line-height:2">
+            Version: <span style="color:var(--amber)">2.0.0 Unified</span><br/>
+            Engine: <span style="color:var(--cyan)">Rule-based + Heuristic AI</span><br/>
+            Email signals: <span style="color:var(--ok)">12 active</span><br/>
+            URL signals: <span style="color:var(--ok)">12 active</span><br/>
+            Integrations: <span style="color:var(--ok)">4 available</span><br/>
+            Backend: <span style="color:var(--ok)">FastAPI + Python</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<div id="toast-wrap"></div>
+
+<script>
+/* ══════════════════════════════════════════════
+   PHISHGUARD AI — UNIFIED APP JAVASCRIPT
+══════════════════════════════════════════════ */
+
+// ── GLOBAL STATE ─────────────────────────────
+const STATE = {
+  apiUrl: '',
+  history: [],
+  stats: { emails: 0, urls: 0, threats: 0, clean: 0, times: [] },
+};
+
+const RISK_COLORS = {
+  SAFE:     '#34d399', LOW:  '#6ee7b7',
+  MEDIUM:   '#fbbf24', HIGH: '#fb923c', CRITICAL: '#f87171',
+};
+
+// ── NAVIGATION ────────────────────────────────
+const PAGE_LABELS = {
+  'dashboard':'Dashboard','email-scan':'Email Scanner','url-scan':'URL Scanner',
+  'extension':'Chrome Extension','smtp':'SMTP Milter','webhook':'Pub/Sub Webhook',
+  'addon':'Gmail Add-in','history':'Scan History','settings':'Settings'
+};
+
+function showPage(id, navEl) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(`page-${id}`)?.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (navEl) navEl.classList.add('active');
+  else {
+    document.querySelectorAll('.nav-item').forEach(n => {
+      if (n.getAttribute('onclick')?.includes(id)) n.classList.add('active');
+    });
+  }
+  document.getElementById('breadcrumb').textContent = PAGE_LABELS[id] || id;
+  document.getElementById('sideNav').classList.remove('open');
+}
+
+// ── RISK HELPERS ──────────────────────────────
+function classifyRisk(score) {
+  if (score < 0.2) return ['SAFE', false];
+  if (score < 0.4) return ['LOW', false];
+  if (score < 0.6) return ['MEDIUM', true];
+  if (score < 0.8) return ['HIGH', true];
+  return ['CRITICAL', true];
+}
+function getRec(risk) {
+  return {
+    SAFE:'No threats detected. This appears to be legitimate.',
+    LOW:'Minor concerns detected. Exercise normal caution.',
+    MEDIUM:'Potential phishing attempt. Do not click links or provide information.',
+    HIGH:'High-confidence phishing detected. Delete immediately and report.',
+    CRITICAL:'⚠ CRITICAL THREAT. Do not interact. Report to IT security immediately.',
+  }[risk];
+}
+
+// ── SCAN ENGINE (client-side simulation) ──────
+function simulateEmailScan(sender, subject, body) {
+  const text = `${sender} ${subject} ${body}`.toLowerCase();
+  const kws = ['verify','urgent','suspended','click here','password','bank account',
+    'lottery','prize','immediately','unusual activity','security alert','confirm identity',
+    'limited time','act now','billing problem','wire transfer','update payment'];
+  const hits = kws.filter(k => text.includes(k));
+  let score = Math.min(hits.length * 0.12, 0.85);
+  const inds = [];
+  if (hits.length) { inds.push(`Phishing keywords: "${hits.slice(0,3).join('", "')}"`); }
+  if (sender.match(/\.(xyz|tk|ml|cf|gq|top|club)$/i)) { score = Math.min(score + 0.25, 1); inds.push(`High-risk sender TLD detected`); }
+  if (sender.match(/paypa[^l]|g0ogle|amaz0n|micros0ft/i)) { score = Math.min(score + 0.35, 1); inds.push('Lookalike/homograph domain in sender'); }
+  if (/immediately|urgent|asap|within 24/i.test(text)) { score = Math.min(score + 0.1, 1); inds.push('High-urgency language patterns'); }
+  if (/password|ssn|credit card|cvv|bank account|pin/i.test(text)) { score = Math.min(score + 0.18, 1); inds.push('Sensitive information request detected'); }
+  if (!inds.length) inds.push('No suspicious indicators found');
+  const [risk, is_phishing] = classifyRisk(score);
+  return { is_phishing, confidence: score, risk_level: risk,
+    threat_type: score > 0.4 ? (score > 0.7 ? 'Credential Harvesting' : 'Social Engineering') : null,
+    indicators: inds, recommendation: getRec(risk),
+    scan_id: Math.random().toString(36).slice(2,10).toUpperCase(),
+    scan_time_ms: (Math.random()*18+6).toFixed(1) };
+}
+
+function simulateUrlScan(url) {
+  let score = 0; const inds = [];
+  const lower = url.toLowerCase();
+  const host = (() => { try { return new URL(url.startsWith('http') ? url : `https://${url}`).hostname; } catch { return ''; } })();
+
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(host)) { score += 0.45; inds.push('IP address used instead of domain name'); }
+  if (url.length > 75) { score += 0.1; inds.push(`Abnormally long URL (${url.length} chars)`); }
+  const parts = host.split('.');
+  if (parts.length > 4) { score += 0.15; inds.push(`Excessive subdomains (${parts.length - 2})`); }
+  const tld = parts[parts.length - 1];
+  if (['xyz','top','tk','ml','cf','ga','gq','club'].includes(tld)) { score += 0.2; inds.push(`High-risk TLD: .${tld}`); }
+  ['paypal','amazon','google','apple','microsoft','netflix','bank','irs','fedex'].forEach(b => {
+    if (lower.includes(b) && !host.endsWith(`${b}.com`)) { score = Math.min(score + 0.3, 1); inds.push(`Brand impersonation: "${b}" in non-official domain`); }
+  });
+  if (url.includes('@')) { score = Math.min(score + 0.3, 1); inds.push('@ symbol redirect trick detected'); }
+  if (/%[0-9a-f]{2}/i.test(url)) { score += 0.1; inds.push('URL-encoded character obfuscation'); }
+  if (/^http:\/\//i.test(url)) { score += 0.12; inds.push('Unencrypted HTTP (no SSL certificate)'); }
+  if (/\/{2,}/.test(url.split('?')[0].replace('://', ''))) { score += 0.1; inds.push('Double-slash redirect pattern'); }
+  if (!inds.length) inds.push('No suspicious indicators found');
+  score = Math.min(score, 1.0);
+  const [risk, is_phishing] = classifyRisk(score);
+  return { is_phishing, confidence: score, risk_level: risk,
+    threat_type: score > 0.4 ? 'Malicious Redirect' : null,
+    indicators: inds, recommendation: getRec(risk),
+    scan_id: Math.random().toString(36).slice(2,10).toUpperCase(),
+    scan_time_ms: (Math.random()*12+4).toFixed(1) };
+}
+
+// ── API CALL (with fallback) ──────────────────
+async function apiFetch(endpoint, body) {
+  try {
+    const r = await fetch(`${STATE.apiUrl || ''}${endpoint}`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body), signal: AbortSignal.timeout(8000)
+    });
+    if (r.ok) return await r.json();
+  } catch {}
+  return null;
+}
+
+// ── RENDER RESULT ─────────────────────────────
+function buildRing(confidence, risk) {
+  const pct = Math.round(confidence * 100);
+  const color = RISK_COLORS[risk] || '#00d4ff';
+  const R = 20, circ = 2 * Math.PI * R;
+  const offset = circ - (circ * pct / 100);
+  return `<div class="verdict-ring" title="${pct}% confidence">
+    <svg width="52" height="52" viewBox="0 0 52 52">
+      <circle class="ring-bg" cx="26" cy="26" r="${R}"/>
+      <circle class="ring-fg" cx="26" cy="26" r="${R}" stroke="${color}"
+        stroke-dasharray="${circ}" stroke-dashoffset="${offset}"/>
+    </svg>
+    <div class="ring-pct" style="color:${color}">${pct}%</div>
+  </div>`;
+}
+
+function renderResult(boxId, data) {
+  const box = document.getElementById(boxId);
+  const color = RISK_COLORS[data.risk_level];
+  const pct = Math.round(data.confidence * 100);
+  const inds = data.indicators.map((t, i) =>
+    `<div class="indicator ${data.is_phishing?'':'safe'}" style="animation-delay:${i*0.05}s">${t}</div>`
+  ).join('');
+  box.innerHTML = `
+    <div class="result-head" style="background:rgba(${data.is_phishing?'248,113,113':'52,211,153'},0.04);border-bottom:1px solid var(--border)">
+      <div class="result-verdict">
+        ${buildRing(data.confidence, data.risk_level)}
+        <div>
+          <div class="risk-chip r-${data.risk_level}">${data.risk_level} RISK</div>
+          ${data.threat_type ? `<div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text2);margin-top:5px">⚠ ${data.threat_type}</div>` : ''}
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--muted)">SCAN ID</div>
+        <div style="font-family:var(--font-mono);font-size:0.78rem;color:var(--amber)">#${data.scan_id}</div>
+      </div>
+    </div>
+    <div class="result-body">
+      <div class="result-section">
+        <div class="section-title">Detection Signals</div>
+        <div class="indicator-list">${inds}</div>
+      </div>
+      <div class="result-section">
+        <div class="section-title">Recommendation</div>
+        <div class="rec-box" style="border-color:${color}">${data.recommendation}</div>
+      </div>
+      <div class="meta-pills">
+        <div class="meta-pill">⏱ ${data.scan_time_ms}ms</div>
+        <div class="meta-pill">🔍 ${data.indicators.length} signal${data.indicators.length!==1?'s':''}</div>
+        <div class="meta-pill" style="color:${color}">● ${data.risk_level}</div>
+      </div>
+    </div>`;
+  box.classList.add('show');
+  box.style.borderColor = color + '44';
+}
+
+// ── EMAIL SCAN ────────────────────────────────
+async function runEmailScan() {
+  const btn = document.getElementById('email-scan-btn');
+  const sender = document.getElementById('e-sender').value.trim();
+  const subject = document.getElementById('e-subject').value.trim();
+  const body = document.getElementById('e-body').value.trim();
+  if (!sender && !subject && !body) { toast('Enter at least one field to analyze.', 'warn'); return; }
+  btn.disabled = true; btn.classList.add('loading'); btn.textContent = 'Analyzing...';
+  try {
+    let data = await apiFetch('/api/scan/email', { sender, subject, body });
+    if (!data) data = simulateEmailScan(sender, subject, body);
+    renderResult('email-result', data);
+    addHistory('email', sender || subject || 'Email', data);
+    updateStats('email', data);
+    if (data.is_phishing) toast(`🚨 ${data.risk_level} RISK — ${data.threat_type || 'Phishing detected'}`, 'danger');
+    else toast(`✅ Email appears safe (${Math.round(data.confidence*100)}% threat score)`, 'success');
+  } finally {
+    btn.disabled = false; btn.classList.remove('loading'); btn.innerHTML = '⚡ Analyze Email';
+  }
+}
+
+function loadEmailExample() {
+  document.getElementById('e-sender').value = 'security-alerts@paypa1-secure.xyz';
+  document.getElementById('e-subject').value = 'URGENT: Your account has been suspended!';
+  document.getElementById('e-body').value = `Dear Valued Customer,
+
+We have detected unusual activity on your PayPal account. Your account has been temporarily suspended.
+
+Please verify your identity immediately by clicking the link below, or your account will be permanently closed within 24 hours.
+
+Act now to restore access: http://paypal-verify.account-secure-login.xyz/confirm
+
+You will need to provide your:
+- Full name
+- Credit card number and CVV
+- Bank account details
+- Social security number
+
+This is an urgent security alert. Failure to comply will result in permanent account closure.
+
+PayPal Security Team`;
+}
+
+// ── URL SCAN ──────────────────────────────────
+function setUrl(url) {
+  document.getElementById('u-url').value = url;
+  urlLivePreview();
+}
+
+function urlLivePreview() {
+  const url = document.getElementById('u-url').value.trim();
+  const el = document.getElementById('url-preview');
+  if (!url) { el.innerHTML = 'Enter a URL above to see real-time analysis...'; el.style.color = 'var(--muted)'; return; }
+  const features = [];
+  try {
+    const p = new URL(url.startsWith('http') ? url : `https://${url}`);
+    const isHttps = p.protocol === 'https:';
+    features.push(`<span style="color:var(--muted)">Protocol:</span> <span style="color:${isHttps?'var(--ok)':'var(--danger)'}">${p.protocol.replace(':','')}</span>`);
+    features.push(`<span style="color:var(--muted)">Host:</span> <span style="color:var(--cyan)">${p.hostname}</span>`);
+    const subs = p.hostname.split('.').length - 2;
+    if (subs > 0) features.push(`<span style="color:var(--muted)">Subdomains:</span> <span style="color:${subs>2?'var(--danger)':'var(--mid)'}">${subs}</span>`);
+    features.push(`<span style="color:var(--muted)">Length:</span> <span style="color:${url.length>75?'var(--warn)':'var(--ok)'}">${url.length}ch</span>`);
+    if (url.includes('@')) features.push(`<span style="color:var(--danger)">⚠ @ trick</span>`);
+    if (/%[0-9a-f]{2}/i.test(url)) features.push(`<span style="color:var(--warn)">⚠ encoded</span>`);
+  } catch { features.push(`<span style="color:var(--danger)">⚠ Malformed URL</span>`); }
+  el.innerHTML = features.join(' &nbsp;·&nbsp; ');
+  el.style.color = 'var(--text)';
+}
+
+async function runUrlScan() {
+  const btn = document.getElementById('url-scan-btn');
+  const url = document.getElementById('u-url').value.trim();
+  if (!url) { toast('Please enter a URL.', 'warn'); return; }
+  btn.disabled = true; btn.classList.add('loading'); btn.textContent = 'Analyzing...';
+  try {
+    let data = await apiFetch('/api/scan/url', { url });
+    if (!data) data = simulateUrlScan(url);
+    renderResult('url-result', data);
+    addHistory('url', url, data);
+    updateStats('url', data);
+    if (data.is_phishing) toast(`🚨 MALICIOUS URL — ${data.risk_level} RISK`, 'danger');
+    else toast(`✅ URL appears safe`, 'success');
+  } finally {
+    btn.disabled = false; btn.classList.remove('loading'); btn.innerHTML = '⚡ Analyze URL';
+  }
+}
+
+// ── HISTORY ───────────────────────────────────
+function addHistory(type, target, data) {
+  STATE.history.unshift({ type, target, data, time: new Date() });
+  renderHistory();
+}
+
+function renderHistory() {
+  const list = document.getElementById('history-list');
+  document.getElementById('history-count').textContent = `${STATE.history.length} scan${STATE.history.length!==1?'s':''} recorded`;
+  if (!STATE.history.length) {
+    list.innerHTML = '<div style="padding:40px;text-align:center;font-family:var(--font-mono);font-size:0.82rem;color:var(--muted)">No scans yet.</div>';
+    return;
+  }
+  list.innerHTML = STATE.history.slice(0,50).map(item => {
+    const color = RISK_COLORS[item.data.risk_level];
+    const pct = Math.round(item.data.confidence * 100);
+    return `<div class="hist-row">
+      <div class="hist-icon" style="background:rgba(${item.type==='email'?'0,212,255':'167,139,250'},0.08)">
+        ${item.type==='email'?'📧':'🔗'}
+      </div>
+      <div>
+        <div class="hist-target">${item.target.slice(0,60)}</div>
+        <div class="hist-time">${item.time.toLocaleTimeString()}</div>
+      </div>
+      <div class="hist-pct">${pct}%</div>
+      <div class="risk-chip r-${item.data.risk_level}" style="font-size:0.68rem;padding:3px 9px">${item.data.risk_level}</div>
+    </div>`;
+  }).join('');
+}
+
+function clearHistory() { STATE.history.length = 0; renderHistory(); toast('History cleared', 'success'); }
+
+// ── STATS ─────────────────────────────────────
+function updateStats(type, data) {
+  if (type === 'email') STATE.stats.emails++;
+  else STATE.stats.urls++;
+  if (data.is_phishing) STATE.stats.threats++;
+  else STATE.stats.clean++;
+  STATE.stats.times.push(parseFloat(data.scan_time_ms));
+  const total = STATE.stats.emails + STATE.stats.urls;
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-threats').textContent = STATE.stats.threats;
+  document.getElementById('stat-clean').textContent = STATE.stats.clean;
+  document.getElementById('ts-scans').textContent = total;
+  document.getElementById('ts-threats').textContent = STATE.stats.threats;
+  document.getElementById('stat-emails-count').textContent = STATE.stats.emails;
+  document.getElementById('stat-urls-count').textContent = STATE.stats.urls;
+  document.getElementById('stat-found-count').textContent = STATE.stats.threats;
+  document.getElementById('stat-safe-count').textContent = STATE.stats.clean;
+  const avg = STATE.stats.times.length ? (STATE.stats.times.reduce((a,b)=>a+b,0)/STATE.stats.times.length).toFixed(1) : 0;
+  document.getElementById('stat-avgtime').textContent = avg + 'ms';
+}
+
+function resetStats() {
+  STATE.stats = { emails:0, urls:0, threats:0, clean:0, times:[] };
+  ['stat-total','stat-threats','stat-clean','stat-emails-count','stat-urls-count','stat-found-count','stat-safe-count'].forEach(id => document.getElementById(id).textContent = '0');
+  document.getElementById('stat-avgtime').textContent = '0ms';
+  document.getElementById('ts-scans').textContent = '0';
+  document.getElementById('ts-threats').textContent = '0';
+  toast('Statistics reset', 'success');
+}
+
+// ── SETTINGS ─────────────────────────────────
+function saveApiUrl() {
+  STATE.apiUrl = document.getElementById('cfg-api').value.trim() || '';
+  document.getElementById('api-url-display').textContent = STATE.apiUrl.replace('http://','').replace('https://','');
+  toast('API URL saved', 'success');
+}
+
+async function testApiConnection() {
+  const url = document.getElementById('cfg-api').value.trim();
+  const el = document.getElementById('api-test-result');
+  el.style.display = 'block';
+  el.textContent = '⏳ Testing connection...';
+  el.style.background = 'rgba(255,179,71,0.08)'; el.style.borderLeft = '3px solid var(--amber)'; el.style.color = 'var(--amber)';
+  try {
+    const r = await fetch(`${url}/health`, { signal: AbortSignal.timeout(5000) });
+    const d = await r.json();
+    el.textContent = `✅ Connected — ${d.engine || 'PhishGuard API'} (${d.version || 'v1'})`;
+    el.style.background = 'rgba(52,211,153,0.08)'; el.style.borderLeft = '3px solid var(--ok)'; el.style.color = 'var(--ok)';
+    document.getElementById('ts-api-status').textContent = '●'; document.getElementById('ts-api-status').style.color = 'var(--ok)';
+    document.getElementById('ts-api-label').textContent = 'API OK';
+  } catch {
+    el.textContent = `⚠ Cannot reach ${url} — using client-side simulation`;
+    el.style.background = 'rgba(251,146,60,0.08)'; el.style.borderLeft = '3px solid var(--warn)'; el.style.color = 'var(--warn)';
+    document.getElementById('ts-api-status').textContent = '●'; document.getElementById('ts-api-status').style.color = 'var(--warn)';
+    document.getElementById('ts-api-label').textContent = 'Offline (sim)';
+  }
+}
+
+// ── CODE GENERATORS ───────────────────────────
+function generateExtensionCode() {
+  const apiUrl = document.getElementById('ext-api-url').value.trim() || '';
+  document.getElementById('ext-url-in-manifest').textContent = apiUrl;
+  toast('Extension manifest updated with your API URL', 'success');
+}
+
+function generateSmtpConfig() {
+  const port = document.getElementById('smtp-port').value.trim() || '8894';
+  const api = document.getElementById('smtp-api').value.trim() || '';
+  const crit = document.getElementById('smtp-critical').value;
+  const high = document.getElementById('smtp-high').value;
+  const med = document.getElementById('smtp-medium').value;
+  const content = `<span class="c"># PhishGuard Milter — Generated Configuration</span>
+
+<span class="c"># phishguard_milter.py — set these constants</span>
+<span class="v">PHISHGUARD_API</span> = <span class="s">"${api}"</span>
+<span class="v">MILTER_PORT</span>    = <span class="v">${port}</span>
+<span class="v">REJECT_ON</span>      = <span class="s">["${crit === 'REJECT' ? 'CRITICAL' : ''}"</span>]
+<span class="v">QUARANTINE_ON</span>  = <span class="s">["${high === 'QUARANTINE' ? 'HIGH' : ''}"</span>]
+<span class="v">WARN_ON</span>        = <span class="s">["${med === 'WARN' ? 'MEDIUM' : ''}"</span>]
+
+<span class="c"># Postfix /etc/postfix/main.cf additions</span>
+<span class="cmd">smtpd_milters = inet:127.0.0.1:${port}</span>
+<span class="cmd">non_smtpd_milters = inet:127.0.0.1:${port}</span>
+<span class="cmd">milter_default_action = accept</span>
+<span class="cmd">milter_protocol = 6</span>
+
+<span class="c"># Run milter</span>
+<span class="cmd">python phishguard_milter.py &</span>
+<span class="cmd">postfix reload</span>`;
+  document.getElementById('smtp-config-content').innerHTML = content;
+  document.getElementById('smtp-config-out').style.display = 'block';
+  toast('Milter configuration generated', 'success');
+}
+
+function generateWebhookSteps() {
+  const project = document.getElementById('wh-project').value.trim() || 'YOUR_PROJECT_ID';
+  const webhookUrl = document.getElementById('wh-url').value.trim() || 'https://yourserver.com/webhook/gmail';
+  const api = document.getElementById('wh-api').value.trim() || '';
+  const steps = [
+    { t: 'Enable APIs', d: `Run: <code>gcloud services enable gmail.googleapis.com pubsub.googleapis.com --project=${project}</code>` },
+    { t: 'Create Pub/Sub topic', d: `<code>gcloud pubsub topics create phishguard-gmail-notifications --project=${project}</code>` },
+    { t: 'Create push subscription', d: `<code>gcloud pubsub subscriptions create phishguard-sub --topic=phishguard-gmail-notifications --push-endpoint=${webhookUrl} --project=${project}</code>` },
+    { t: 'Set environment & register watch', d: `<code>export GOOGLE_PROJECT_ID=${project}</code><br/><code>export PHISHGUARD_API=${api}</code><br/><code>python setup_gmail_watch.py</code>` },
+    { t: 'Start webhook server', d: `<code>python phishguard_webhook.py</code> — listens on port 5050` },
+    { t: 'Verify', d: `Send yourself an email and watch the labels appear in Gmail: <code>PhishGuard/Phishing</code> or <code>PhishGuard/Suspected</code>` },
+  ];
+  document.getElementById('wh-steps-list').innerHTML = steps.map((s, i) =>
+    `<div class="step-item"><div class="step-num">${i+1}</div><div class="step-text"><strong style="color:var(--text)">${s.t}:</strong> ${s.d}</div></div>`
+  ).join('');
+  document.getElementById('wh-steps-out').style.display = 'block';
+  toast('Setup steps generated with your project details', 'success');
+}
+
+function generateAddonCode() {
+  const api = document.getElementById('addon-api').value.trim() || 'https://your-phishguard-api.com';
+  const snippet = `<span class="c">// Google Apps Script — Code.gs</span>
+<span class="k">const</span> <span class="v">PHISHGUARD_API_URL</span> = <span class="s">"${api}"</span>;
+
+<span class="k">function</span> <span class="v">buildAddOn</span>(e) {
+  <span class="k">const</span> msg = getCurrentMessage(e);
+  <span class="k">const</span> result = scanEmail(msg.sender, msg.subject, msg.body);
+  <span class="k">return</span> buildResultCard(result, msg);
+}
+
+<span class="k">function</span> <span class="v">scanEmail</span>(sender, subject, body) {
+  <span class="k">const</span> r = UrlFetchApp.fetch(<span class="s">\`\${PHISHGUARD_API_URL}/api/scan/email\`</span>, {
+    method: <span class="s">'post'</span>, contentType: <span class="s">'application/json'</span>,
+    payload: JSON.stringify({ sender, subject, body })
+  });
+  <span class="k">return</span> JSON.parse(r.getContentText());
+}
+<span class="c">// → paste full Code.gs from provided files</span>`;
+  document.getElementById('addon-code-content').innerHTML = snippet;
+  document.getElementById('addon-code-out').style.display = 'block';
+  toast('Apps Script snippet generated with your API URL', 'success');
+}
+
+// ── COPY HELPERS ──────────────────────────────
+function copyCode(blockId) {
+  const el = document.getElementById(blockId);
+  const text = el.innerText.replace(/^Copy\n/,'');
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = el.querySelector('.copy-btn');
+    if (btn) { btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 2000); }
+  });
+}
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => toast('Copied to clipboard', 'success'));
+}
+
+// ── TOAST ─────────────────────────────────────
+function toast(msg, type = 'success') {
+  const c = document.getElementById('toast-wrap');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span>${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(() => {
+    t.style.animation = 'toastOut 0.35s cubic-bezier(.22,1,.36,1) forwards';
+    setTimeout(() => t.remove(), 350);
+  }, 3500);
+}
+
+// ── INIT ──────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  testApiConnection();
+  document.getElementById('cfg-api').value = STATE.apiUrl;
+  renderHistory();
+});
+</script>
+</body>
+</html>

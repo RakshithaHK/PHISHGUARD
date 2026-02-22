@@ -1,0 +1,175 @@
+/* PhishGuard AI — Gmail Injected Styles */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap');
+
+/* ── SCAN BUTTON ── */
+.phishguard-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, rgba(0,229,255,0.12), rgba(123,97,255,0.12));
+  border: 1px solid rgba(0,229,255,0.3);
+  border-radius: 6px;
+  color: #00e5ff;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: all 0.2s ease;
+  user-select: none;
+  vertical-align: middle;
+}
+
+.phishguard-btn:hover {
+  background: linear-gradient(135deg, rgba(0,229,255,0.2), rgba(123,97,255,0.2));
+  border-color: rgba(0,229,255,0.6);
+  box-shadow: 0 0 12px rgba(0,229,255,0.2);
+  transform: translateY(-1px);
+}
+
+/* ── THREAT BANNER ── */
+.phishguard-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 12px 16px;
+  padding: 14px 18px;
+  border: 1px solid rgba(0,229,255,0.2);
+  border-radius: 12px;
+  background: rgba(13,17,23,0.95);
+  font-family: 'DM Mono', monospace;
+  font-size: 12.5px;
+  line-height: 1.5;
+  z-index: 9999;
+  animation: pgSlideIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  backdrop-filter: blur(10px);
+}
+
+@keyframes pgSlideIn {
+  from { transform: translateY(-8px); opacity: 0; }
+  to   { transform: none; opacity: 1; }
+}
+
+.pg-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.pg-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.pg-title-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.pg-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pg-threat-type {
+  font-size: 11px;
+  opacity: 0.75;
+  text-transform: none;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.pg-sub {
+  color: #8899aa;
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+
+.pg-confidence {
+  font-size: 18px;
+  font-weight: 700;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.pg-dismiss {
+  background: none;
+  border: none;
+  color: #556677;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.pg-dismiss:hover {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+}
+
+.pg-indicators {
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding-top: 10px;
+}
+
+.pg-indicators ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.pg-indicator {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: #ccd6e0;
+  font-size: 11.5px;
+}
+.pg-indicator::before {
+  content: '›';
+  color: #ff3b5c;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.pg-meta {
+  color: #445566;
+  font-size: 10.5px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding-top: 8px;
+  letter-spacing: 0.03em;
+}
+
+/* ── LOADING STATE ── */
+.pg-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #00e5ff;
+  font-size: 12px;
+}
+
+.pg-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(0,229,255,0.2);
+  border-top-color: #00e5ff;
+  border-radius: 50%;
+  animation: pgSpin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes pgSpin {
+  to { transform: rotate(360deg); }
+}

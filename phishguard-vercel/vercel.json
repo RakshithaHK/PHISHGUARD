@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "name": "phishguard-ai",
+  "builds": [
+    {
+      "src": "api/*.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "index.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    { "src": "/api/scan/email", "dest": "/api/scan_email.py" },
+    { "src": "/api/scan/url",   "dest": "/api/scan_url.py"   },
+    { "src": "/api/stats",      "dest": "/api/stats.py"      },
+    { "src": "/api/health",     "dest": "/api/health.py"     },
+    { "src": "/(.*)",           "dest": "/index.html"        }
+  ]
+}

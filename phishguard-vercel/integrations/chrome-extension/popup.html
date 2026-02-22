@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 320px; background: #080b10; color: #e2eaf5;
+    font-family: 'DM Mono', 'Courier New', monospace; font-size: 13px;
+  }
+  .header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 16px; border-bottom: 1px solid #1c2a38;
+    background: linear-gradient(135deg, rgba(0,229,255,0.05), rgba(123,97,255,0.05));
+  }
+  .logo { font-size: 22px; }
+  .title { font-size: 14px; font-weight: 700; color: #00e5ff; }
+  .sub { font-size: 10px; color: #556677; margin-top: 2px; }
+  .status-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 16px; border-bottom: 1px solid #1c2a38;
+    font-size: 11px; color: #556677;
+  }
+  .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #00e096;
+    box-shadow: 0 0 6px #00e096;
+    animation: blink 2s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100% { opacity:1 } 50% { opacity:0.2 } }
+  .section { padding: 12px 16px; border-bottom: 1px solid #1c2a38; }
+  .section-title {
+    font-size: 10px; text-transform: uppercase; letter-spacing: .08em;
+    color: #445566; margin-bottom: 10px;
+  }
+  .stat-row {
+    display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 7px; font-size: 12px;
+  }
+  .stat-val { font-weight: 700; color: #00e5ff; }
+  .stat-val.danger { color: #ff3b5c; }
+  .stat-val.ok { color: #00e096; }
+  .url-input {
+    width: 100%; background: #0d1117; border: 1px solid #1c2a38;
+    border-radius: 7px; color: #e2eaf5; font-family: inherit;
+    font-size: 11px; padding: 8px 10px; outline: none;
+  }
+  .url-input:focus { border-color: #00e5ff; }
+  .scan-btn {
+    width: 100%; padding: 9px;
+    background: linear-gradient(135deg, #00e5ff, #7b61ff);
+    color: #000; font-family: inherit; font-size: 11px; font-weight: 700;
+    border: none; border-radius: 7px; cursor: pointer; margin-top: 8px;
+    letter-spacing: .06em; text-transform: uppercase;
+    transition: opacity .2s;
+  }
+  .scan-btn:hover { opacity: .88; }
+  .result {
+    margin-top: 10px; padding: 10px; border-radius: 7px;
+    border: 1px solid #1c2a38; font-size: 11px; display: none;
+  }
+  .result.visible { display: block; }
+  .footer {
+    padding: 10px 16px; text-align: center;
+    font-size: 10px; color: #334455;
+  }
+  a { color: #00e5ff; text-decoration: none; }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">🛡</div>
+  <div>
+    <div class="title">PhishGuard AI</div>
+    <div class="sub">Real-Time Threat Detection</div>
+  </div>
+</div>
+
+<div class="status-row">
+  <div class="dot"></div>
+  <span>Engine active — auto-scanning Gmail</span>
+</div>
+
+<div class="section">
+  <div class="section-title">Session Stats</div>
+  <div class="stat-row"><span>Emails scanned</span><span class="stat-val" id="s-emails">0</span></div>
+  <div class="stat-row"><span>URLs checked</span><span class="stat-val" id="s-urls">0</span></div>
+  <div class="stat-row"><span>Threats blocked</span><span class="stat-val danger" id="s-threats">0</span></div>
+  <div class="stat-row"><span>Last scan</span><span class="stat-val ok" id="s-last">—</span></div>
+</div>
+
+<div class="section">
+  <div class="section-title">Quick URL Check</div>
+  <input class="url-input" id="url-inp" type="text" placeholder="Paste any URL to check..."/>
+  <button class="scan-btn" id="check-btn" onclick="checkUrl()">⚡ Check URL</button>
+  <div class="result" id="url-result"></div>
+</div>
+
+<div class="footer">
+  <a href="http://localhost:8000/docs" target="_blank">API Docs</a> &nbsp;·&nbsp;
+  PhishGuard v1.0
+</div>
+
+<script>
+const RISK_COLORS = { SAFE:'#00e096', LOW:'#5df5c0', MEDIUM:'#ffcc00', HIGH:'#ff9500', CRITICAL:'#ff3b5c' };
+
+// Load session stats from storage
+chrome.storage.session.get(['emails','urls','threats','lastScan'], (d) => {
+  document.getElementById('s-emails').textContent  = d.emails  || 0;
+  document.getElementById('s-urls').textContent    = d.urls    || 0;
+  document.getElementById('s-threats').textContent = d.threats || 0;
+  document.getElementById('s-last').textContent    = d.lastScan || '—';
+});
+
+async function checkUrl() {
+  const url = document.getElementById('url-inp').value.trim();
+  if (!url) return;
+  const btn = document.getElementById('check-btn');
+  btn.textContent = '⏳ Scanning...'; btn.disabled = true;
+
+  try {
+    const r = await fetch('http://localhost:8000/api/scan/url', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url })
+    });
+    const data = await r.json();
+    const color = RISK_COLORS[data.risk_level];
+    const el = document.getElementById('url-result');
+    el.style.borderColor = color + '44';
+    el.style.background  = color + '12';
+    el.innerHTML = `
+      <div style="color:${color};font-weight:700;margin-bottom:5px">${data.risk_level} RISK — ${Math.round(data.confidence*100)}%</div>
+      <div style="color:#8899aa;font-size:10.5px">${data.recommendation}</div>`;
+    el.classList.add('visible');
+  } catch {
+    document.getElementById('url-result').innerHTML = `<span style="color:#ff9500">⚠ Cannot reach PhishGuard API</span>`;
+    document.getElementById('url-result').classList.add('visible');
+  } finally {
+    btn.textContent = '⚡ Check URL'; btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>

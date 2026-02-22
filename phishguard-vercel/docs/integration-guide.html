@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PhishGuard AI — Gmail Integration Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #060910; --surface: #0c1018; --card: #101620;
+  --border: #182030; --accent: #00e5ff; --accent2: #7b61ff;
+  --danger: #ff3b5c; --warn: #ff9500; --ok: #00e096;
+  --text: #dce8f5; --muted: #4a6070;
+  --font-head: 'Syne', sans-serif; --font-mono: 'DM Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: var(--font-head); min-height: 100vh; overflow-x: hidden;
+}
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background-image: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0,229,255,0.06), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(123,97,255,0.05), transparent);
+  pointer-events: none; z-index: 0;
+}
+.wrapper { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 0 32px 80px; }
+
+/* NAV */
+nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 0; border-bottom: 1px solid var(--border); margin-bottom: 60px;
+}
+.logo { font-size: 1.1rem; font-weight: 800; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+.logo-box { width: 32px; height: 32px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; }
+.nav-pill { font-family: var(--font-mono); font-size: 0.72rem; color: var(--ok); background: rgba(0,224,150,0.08); border: 1px solid rgba(0,224,150,0.2); padding: 5px 12px; border-radius: 100px; }
+
+/* HERO */
+.hero { text-align: center; margin-bottom: 70px; }
+.hero h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; line-height: 1.1; margin-bottom: 16px; background: linear-gradient(135deg, #dce8f5, var(--accent) 50%, var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero-sub { font-family: var(--font-mono); color: var(--muted); font-size: 0.95rem; max-width: 560px; margin: 0 auto 32px; line-height: 1.8; }
+.integration-badges { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.badge { display: flex; align-items: center; gap: 7px; background: var(--card); border: 1px solid var(--border); padding: 8px 16px; border-radius: 100px; font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); transition: all 0.2s; cursor: default; }
+.badge:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ARCH DIAGRAM */
+.arch-section { margin-bottom: 70px; }
+.section-label { font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 16px; }
+.arch-diagram {
+  background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+  padding: 36px 32px; display: flex; align-items: center; justify-content: center;
+  gap: 0; flex-wrap: wrap;
+}
+.arch-node {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 18px 24px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; min-width: 130px; text-align: center;
+  transition: all 0.25s;
+}
+.arch-node:hover { border-color: var(--accent); box-shadow: 0 0 20px rgba(0,229,255,0.08); }
+.arch-node .icon { font-size: 28px; }
+.arch-node .label { font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.arch-node .name { font-size: 0.88rem; font-weight: 700; }
+.arch-arrow {
+  font-size: 20px; color: var(--border); padding: 0 12px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.arch-arrow .arr-label { font-family: var(--font-mono); font-size: 0.65rem; color: var(--muted); white-space: nowrap; }
+.arch-center {
+  background: linear-gradient(135deg, rgba(0,229,255,0.1), rgba(123,97,255,0.1));
+  border-color: rgba(0,229,255,0.3);
+  box-shadow: 0 0 30px rgba(0,229,255,0.08);
+}
+
+/* INTEGRATIONS GRID */
+.integrations-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 60px; }
+@media (max-width: 800px) { .integrations-grid { grid-template-columns: 1fr; } .arch-diagram { flex-direction: column; } .arch-arrow { transform: rotate(90deg); } }
+
+.int-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+  overflow: hidden; transition: border-color 0.3s, transform 0.2s;
+}
+.int-card:hover { border-color: rgba(0,229,255,0.2); transform: translateY(-2px); }
+
+.int-header {
+  padding: 24px 24px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; gap: 14px;
+}
+.int-num {
+  width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: 0.8rem; font-weight: 700; color: #000;
+  flex-shrink: 0;
+}
+.int-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 4px; }
+.int-sub { font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted); line-height: 1.5; }
+
+.int-body { padding: 20px 24px; }
+
+.step-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+.step {
+  display: flex; align-items: flex-start; gap: 12px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px 14px;
+}
+.step-num {
+  width: 22px; height: 22px; background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.2);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: 0.68rem; color: var(--accent);
+  flex-shrink: 0; margin-top: 1px;
+}
+.step-text { font-family: var(--font-mono); font-size: 0.8rem; color: var(--text); line-height: 1.6; }
+.step-text code {
+  background: rgba(0,229,255,0.08); color: var(--accent);
+  padding: 1px 6px; border-radius: 4px; font-size: 0.78rem;
+}
+
+.file-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.file-chip {
+  display: flex; align-items: center; gap: 5px;
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 5px 10px; border-radius: 7px;
+  font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted);
+}
+.file-chip .ext { color: var(--accent2); }
+
+/* CODE BLOCK */
+.code-block {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+  padding: 16px 18px; font-family: var(--font-mono); font-size: 0.8rem;
+  line-height: 1.7; overflow-x: auto; margin: 16px 0;
+  position: relative;
+}
+.code-block .comment { color: var(--muted); }
+.code-block .cmd { color: var(--ok); }
+.code-block .str { color: #ffd080; }
+.code-block .kw { color: var(--accent2); }
+.copy-btn {
+  position: absolute; top: 10px; right: 10px;
+  background: var(--card); border: 1px solid var(--border);
+  color: var(--muted); font-family: var(--font-mono); font-size: 0.68rem;
+  padding: 4px 10px; border-radius: 5px; cursor: pointer; transition: all 0.2s;
+}
+.copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* FLOW TABLE */
+.flow-table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+.flow-table th {
+  text-align: left; font-family: var(--font-mono); font-size: 0.7rem;
+  text-transform: uppercase; letter-spacing: .06em; color: var(--muted);
+  padding: 10px 14px; border-bottom: 1px solid var(--border);
+}
+.flow-table td {
+  padding: 10px 14px; font-family: var(--font-mono); font-size: 0.8rem;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.flow-table tr:last-child td { border-bottom: none; }
+.risk-tag {
+  display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 5px;
+  font-size: 0.7rem; font-weight: 700; font-family: var(--font-mono);
+}
+.r-safe { background: rgba(0,224,150,0.1); color: var(--ok); }
+.r-med  { background: rgba(255,204,0,0.1);  color: #ffcc00; }
+.r-high { background: rgba(255,149,0,0.1);  color: var(--warn); }
+.r-crit { background: rgba(255,59,92,0.1);  color: var(--danger); }
+
+/* PREREQS */
+.prereq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 60px; }
+.prereq-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px;
+}
+.prereq-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.prereq-list { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+.prereq-list li { font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); display: flex; align-items: center; gap: 7px; }
+.prereq-list li::before { content: '•'; color: var(--accent); }
+
+/* COMPARISON TABLE */
+.comparison { margin-bottom: 60px; }
+.compare-table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+.compare-table th { background: var(--surface); font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); padding: 14px 18px; text-align: left; }
+.compare-table td { padding: 14px 18px; font-family: var(--font-mono); font-size: 0.8rem; border-top: 1px solid var(--border); }
+.compare-table tr:hover td { background: rgba(255,255,255,0.015); }
+.tick { color: var(--ok); } .cross { color: var(--danger); } .part { color: var(--warn); }
+.int-name { font-weight: 700; color: var(--text); }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- NAV -->
+  <nav>
+    <div class="logo"><div class="logo-box">🛡</div>PhishGuard AI</div>
+    <div class="nav-pill">Gmail Integration Guide</div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <h1>4 Ways to Connect<br/>PhishGuard to Gmail</h1>
+    <p class="hero-sub">Every integration layer, from browser to server — pick one or deploy all four for maximum coverage.</p>
+    <div class="integration-badges">
+      <div class="badge">🔌 Chrome Extension</div>
+      <div class="badge">📬 SMTP Milter</div>
+      <div class="badge">🔗 Pub/Sub Webhook</div>
+      <div class="badge">📱 Gmail Add-in</div>
+    </div>
+  </div>
+
+  <!-- ARCHITECTURE DIAGRAM -->
+  <div class="arch-section">
+    <div class="section-label">System Architecture</div>
+    <div class="arch-diagram">
+      <div class="arch-node">
+        <div class="icon">🌐</div>
+        <div class="label">Source</div>
+        <div class="name">Internet Mail</div>
+      </div>
+      <div class="arch-arrow"><div>──────→</div><div class="arr-label">SMTP</div></div>
+      <div class="arch-node">
+        <div class="icon">📬</div>
+        <div class="label">Layer 1</div>
+        <div class="name">SMTP Milter</div>
+      </div>
+      <div class="arch-arrow"><div>──────→</div><div class="arr-label">Gmail API</div></div>
+      <div class="arch-node arch-center">
+        <div class="icon">🛡</div>
+        <div class="label">PhishGuard</div>
+        <div class="name">AI Engine</div>
+      </div>
+      <div class="arch-arrow"><div>──────→</div><div class="arr-label">Pub/Sub</div></div>
+      <div class="arch-node">
+        <div class="icon">🔗</div>
+        <div class="label">Layer 3</div>
+        <div class="name">Webhook</div>
+      </div>
+      <div class="arch-arrow"><div>──────→</div><div class="arr-label">Inbox</div></div>
+      <div class="arch-node">
+        <div class="icon">👤</div>
+        <div class="label">Layer 4</div>
+        <div class="name">User (Add-in)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INTEGRATIONS GRID -->
+  <div class="section-label">Integration Details</div>
+  <div class="integrations-grid">
+
+    <!-- 1. CHROME EXTENSION -->
+    <div class="int-card">
+      <div class="int-header">
+        <div class="int-num">01</div>
+        <div>
+          <div class="int-title">🔌 Chrome Extension</div>
+          <div class="int-sub">Injects a scan button + threat banner directly into Gmail's UI. Works instantly in the browser — no server config needed.</div>
+        </div>
+      </div>
+      <div class="int-body">
+        <div class="step-list">
+          <div class="step"><div class="step-num">1</div><div class="step-text">Open Chrome → <code>chrome://extensions</code></div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-text">Enable <code>Developer mode</code> (top right toggle)</div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-text">Click <code>Load unpacked</code> → select the <code>extension/</code> folder</div></div>
+          <div class="step"><div class="step-num">4</div><div class="step-text">Edit <code>content.js</code> line 1: set <code>API_BASE</code> to your server URL</div></div>
+          <div class="step"><div class="step-num">5</div><div class="step-text">Open Gmail — PhishGuard scans every email you open automatically</div></div>
+        </div>
+        <div class="file-chips">
+          <div class="file-chip">📄 <span class="ext">manifest.json</span></div>
+          <div class="file-chip">📄 <span class="ext">content.js</span></div>
+          <div class="file-chip">📄 <span class="ext">content.css</span></div>
+          <div class="file-chip">📄 <span class="ext">background.js</span></div>
+          <div class="file-chip">📄 <span class="ext">popup.html</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. SMTP MILTER -->
+    <div class="int-card">
+      <div class="int-header">
+        <div class="int-num">02</div>
+        <div>
+          <div class="int-title">📬 SMTP Milter</div>
+          <div class="int-sub">Server-level filter. Scans every email before delivery and can reject, quarantine, or label threats automatically.</div>
+        </div>
+      </div>
+      <div class="int-body">
+        <div class="step-list">
+          <div class="step"><div class="step-num">1</div><div class="step-text">Install: <code>pip install pymilter requests</code></div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-text">Configure Postfix <code>main.cf</code>: <code>smtpd_milters = inet:127.0.0.1:8894</code></div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-text">Set thresholds in milter: <code>REJECT_ON = ["CRITICAL"]</code></div></div>
+          <div class="step"><div class="step-num">4</div><div class="step-text">Run: <code>python phishguard_milter.py</code></div></div>
+          <div class="step"><div class="step-num">5</div><div class="step-text">Test: <code>sendmail -v <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="c0b4a5b3b480b9afb5b2a4afada1a9aeeea3afad">[email&#160;protected]</a> &lt; test.eml</code></div></div>
+        </div>
+        <table class="flow-table">
+          <tr><th>Risk</th><th>Action</th></tr>
+          <tr><td><span class="risk-tag r-crit">CRITICAL</span></td><td>Reject (550 error)</td></tr>
+          <tr><td><span class="risk-tag r-high">HIGH</span></td><td>Move to Spam folder</td></tr>
+          <tr><td><span class="risk-tag r-med">MEDIUM</span></td><td>Prepend [SUSPECTED PHISHING]</td></tr>
+          <tr><td><span class="risk-tag r-safe">SAFE</span></td><td>Deliver with X-PhishGuard header</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- 3. WEBHOOK -->
+    <div class="int-card">
+      <div class="int-header">
+        <div class="int-num">03</div>
+        <div>
+          <div class="int-title">🔗 Gmail Webhook (Pub/Sub)</div>
+          <div class="int-sub">Uses Gmail API push notifications to auto-scan every new email and apply labels/filters programmatically.</div>
+        </div>
+      </div>
+      <div class="int-body">
+        <div class="step-list">
+          <div class="step"><div class="step-num">1</div><div class="step-text">Enable Gmail API + Pub/Sub in <code>Google Cloud Console</code></div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-text">Create Pub/Sub topic: <code>phishguard-gmail-notifications</code></div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-text">Create push subscription → <code>https://yourserver.com/webhook/gmail</code></div></div>
+          <div class="step"><div class="step-num">4</div><div class="step-text">Run <code>setup_gmail_watch.py</code> to register inbox watching</div></div>
+          <div class="step"><div class="step-num">5</div><div class="step-text">Deploy <code>phishguard_webhook.py</code> (Flask server on port 5050)</div></div>
+          <div class="step"><div class="step-num">6</div><div class="step-text">Labels are auto-created in Gmail: <code>PhishGuard/Phishing</code>, <code>PhishGuard/Suspected</code></div></div>
+        </div>
+        <div class="file-chips">
+          <div class="file-chip">📄 <span class="ext">phishguard_webhook.py</span></div>
+          <div class="file-chip">📄 <span class="ext">setup_gmail_watch.py</span></div>
+          <div class="file-chip">📄 <span class="ext">credentials.json</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. ADD-IN -->
+    <div class="int-card">
+      <div class="int-header">
+        <div class="int-num">04</div>
+        <div>
+          <div class="int-title">📱 Gmail Add-in</div>
+          <div class="int-sub">Official Google Workspace add-in that shows a PhishGuard panel in the reading pane. Deployable org-wide via admin console.</div>
+        </div>
+      </div>
+      <div class="int-body">
+        <div class="step-list">
+          <div class="step"><div class="step-num">1</div><div class="step-text">Go to <code>script.google.com</code> → New project</div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-text">Replace <code>Code.gs</code> with the provided Apps Script code</div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-text">Replace <code>appsscript.json</code> with the provided manifest</div></div>
+          <div class="step"><div class="step-num">4</div><div class="step-text">Set <code>PHISHGUARD_API_URL</code> to your deployed API endpoint</div></div>
+          <div class="step"><div class="step-num">5</div><div class="step-text">Deploy → New deployment → Gmail Add-on → Publish</div></div>
+          <div class="step"><div class="step-num">6</div><div class="step-text">For org-wide: Admin console → Apps → Marketplace apps → Domain install</div></div>
+        </div>
+        <div class="file-chips">
+          <div class="file-chip">📄 <span class="ext">Code.gs</span></div>
+          <div class="file-chip">📄 <span class="ext">appsscript.json</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- PREREQUISITES -->
+  <div class="section-label">Prerequisites</div>
+  <div class="prereq-grid">
+    <div class="prereq-card">
+      <div class="prereq-title">🐍 Backend Server</div>
+      <ul class="prereq-list">
+        <li>Python 3.10+ with FastAPI running</li>
+        <li>Accessible via public URL (or localhost for extension)</li>
+        <li>PhishGuard backend from <code>phishguard_backend.py</code></li>
+        <li>Optional: Docker / Nginx for production</li>
+      </ul>
+    </div>
+    <div class="prereq-card">
+      <div class="prereq-title">☁️ Google Cloud (Webhook)</div>
+      <ul class="prereq-list">
+        <li>GCP project with billing enabled</li>
+        <li>Gmail API + Cloud Pub/Sub APIs enabled</li>
+        <li>OAuth2 credentials (credentials.json)</li>
+        <li>Pub/Sub topic + push subscription</li>
+      </ul>
+    </div>
+    <div class="prereq-card">
+      <div class="prereq-title">🖥 Chrome Extension</div>
+      <ul class="prereq-list">
+        <li>Google Chrome or Chromium browser</li>
+        <li>Developer mode enabled in extensions</li>
+        <li>PhishGuard API running (local or deployed)</li>
+        <li>No signup or store submission needed</li>
+      </ul>
+    </div>
+    <div class="prereq-card">
+      <div class="prereq-title">📬 SMTP Milter</div>
+      <ul class="prereq-list">
+        <li>Access to your mail server (Postfix/MTA)</li>
+        <li><code>pymilter</code> Python package</li>
+        <li>For Google Workspace: use routing rules instead</li>
+        <li>Linux server recommended</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- COMPARISON -->
+  <div class="comparison">
+    <div class="section-label">Which Integration Should You Use?</div>
+    <table class="compare-table">
+      <tr>
+        <th>Integration</th><th>Blocks Before Delivery</th><th>Works Without Server</th>
+        <th>Org-Wide Deploy</th><th>Setup Complexity</th><th>Best For</th>
+      </tr>
+      <tr>
+        <td class="int-name">🔌 Chrome Extension</td>
+        <td><span class="cross">✗</span></td>
+        <td><span class="tick">✓</span></td>
+        <td><span class="part">Partial</span></td>
+        <td>⭐ Easy</td>
+        <td>Individual users</td>
+      </tr>
+      <tr>
+        <td class="int-name">📬 SMTP Milter</td>
+        <td><span class="tick">✓</span></td>
+        <td><span class="cross">✗</span></td>
+        <td><span class="tick">✓</span></td>
+        <td>⭐⭐⭐ Advanced</td>
+        <td>Self-hosted mail servers</td>
+      </tr>
+      <tr>
+        <td class="int-name">🔗 Pub/Sub Webhook</td>
+        <td><span class="cross">✗</span></td>
+        <td><span class="cross">✗</span></td>
+        <td><span class="tick">✓</span></td>
+        <td>⭐⭐ Medium</td>
+        <td>Google Workspace teams</td>
+      </tr>
+      <tr>
+        <td class="int-name">📱 Gmail Add-in</td>
+        <td><span class="cross">✗</span></td>
+        <td><span class="cross">✗</span></td>
+        <td><span class="tick">✓</span></td>
+        <td>⭐⭐ Medium</td>
+        <td>Business / enterprise orgs</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- QUICK START CODE -->
+  <div class="section-label">Quick Start — Run Everything</div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="navigator.clipboard.writeText(this.nextElementSibling.innerText);this.textContent='Copied!'">Copy</button>
+    <pre><span class="comment"># 1. Start the PhishGuard API backend</span>
+<span class="cmd">pip install fastapi uvicorn pymilter requests flask google-auth google-api-python-client google-cloud-pubsub</span>
+<span class="cmd">python phishguard_backend.py</span>
+<span class="comment">      → API running at http://localhost:8000</span>
+
+<span class="comment"># 2. Load Chrome extension</span>
+<span class="comment">      → chrome://extensions → Load unpacked → select extension/ folder</span>
+
+<span class="comment"># 3. Start the Pub/Sub webhook listener</span>
+<span class="kw">export</span> <span class="str">GOOGLE_PROJECT_ID</span>=your-project-id
+<span class="cmd">python setup_gmail_watch.py</span>   <span class="comment"># run once</span>
+<span class="cmd">python phishguard_webhook.py</span>  <span class="comment"># keep running</span>
+
+<span class="comment"># 4. Start SMTP milter (if self-hosted mail)</span>
+<span class="cmd">python phishguard_milter.py<
